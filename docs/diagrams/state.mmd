@@ -1,0 +1,31 @@
+%% ProjectState fields grouped by purpose. Source: packages/core/state.py
+flowchart LR
+    subgraph Input
+        UR[user_request]
+        PID[project_id]
+        PP[project_path]
+    end
+    subgraph Planning
+        TASKS[tasks]
+        CT[current_task]
+    end
+    subgraph Context
+        PC[project_context]
+        RD[retrieved_docs]
+    end
+    subgraph Work
+        GC[generated_code]
+        EL[execution_logs]
+        TP[test_passed]
+        RF[review_feedback]
+        RV[review_verdict]
+    end
+    subgraph Control
+        RC[retry_count]
+        MR[max_retries]
+        NR[needs_reflection]
+    end
+    subgraph Output
+        MSGS[messages]
+        FR[final_response]
+    end

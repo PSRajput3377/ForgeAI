@@ -112,8 +112,8 @@ without a live LLM or pulled models**.
 
 Agents never touch the machine directly; they invoke tools that return a
 uniform `ToolResult` (`packages/tools`). Phase 2 ships a sandboxed
-`FilesystemTool` (path-escape protected). Terminal/Docker (Phase 8), Git
-(Phase 9), Search, and Database tools plug into the same interface.
+`FilesystemTool` (path-escape protected). Terminal/Docker, Git, Search, and
+Database tools plug into the same interface in later phases ([tools.md](tools.md)).
 
 ## LangGraph workflow
 
@@ -122,10 +122,77 @@ edge after **review** that branches to **reflection** (retry) or **git**
 (finish), and a `reflection → coder` retry loop bounded by `max_retries`. The
 whole thing is `compile()`d and run with `run_workflow(router, request)`.
 
-## Phase 2 status
+## Per-agent contracts
+
+Each agent has a single responsibility and a defined input/output over the
+shared state. Formal acceptance criteria live in
+[`../specs/agent-spec.md`](../specs/agent-spec.md).
+
+### Manager
+- **Purpose:** interpret the request, delegate, monitor, produce the final response.
+- **Delegation strategy:** decides which specialists are needed and the order;
+  the graph encodes the sequence. Touches state at `intake` and `final` only.
+- **Retry logic:** owns `max_retries`; the post-review edge drives reflection.
+- **Termination:** stops when Review approves, or retries are exhausted.
+- **Writes:** `messages`, `final_response`. **Never writes code or files.**
+- **Failure cases:** unclear request → still produces a final response noting it.
+
+### Planner
+- **Purpose:** break the request into executable `TaskSpec`s. **Never codes.**
+- **Inputs:** `user_request`. **Outputs:** `tasks`, `current_task`.
+- **Failure cases:** vague request → coarse tasks (refined as research lands).
+- **Future:** parse model output into structured tasks with dependencies.
+
+### Researcher
+- **Purpose:** gather only task-relevant context. Reads README/docs/source.
+  **Never writes code.**
+- **Inputs:** `user_request`, `project_context`. **Outputs:** `retrieved_docs`.
+- **Future:** browser, GitHub, official docs (post-MVP).
+
+### Memory
+- **Purpose:** surface short-term (task/files/errors) and long-term (style, past
+  decisions, frameworks) context.
+- **Inputs:** `user_request`, `project_id`. **Outputs:** `project_context`.
+- **Future:** PostgreSQL (long-term) + Qdrant (semantic recall) in the RAG phase.
+
+### Coder
+- **Purpose:** write code from task + context. **Never guesses; never executes
+  commands; never pushes git.**
+- **Inputs:** `current_task`, `retrieved_docs`, `review_feedback`.
+- **Outputs:** `generated_code` (path → content).
+- **Failure cases:** missing context → relies on Research/Memory rather than
+  inventing.
+
+### Execution
+- **Purpose:** run install/build/test commands, collect logs/exit codes.
+  Runs **only inside Docker**.
+- **Inputs:** `generated_code`, `project_path`. **Outputs:** `execution_logs`.
+
+### Testing
+- **Purpose:** run tests, validate outputs, report pass/fail with evidence.
+- **Inputs:** `execution_logs`, code. **Outputs:** `test_passed`, logs.
+
+### Review
+- **Purpose:** senior review — performance, security, readability, architecture,
+  naming, code smells. **Never writes code.**
+- **Inputs:** `generated_code`, `test_passed`.
+- **Outputs:** `review_verdict` (approved / changes_requested), `review_feedback`.
+
+### Reflection
+- **Purpose:** self-correction — read failures, diagnose, propose a fix, retry.
+- **Inputs:** `execution_logs`, `review_feedback`.
+- **Outputs:** bumps `retry_count`, sets `review_feedback` (the fix), resets
+  `test_passed`; routes back to Coder. Bounded by `max_retries`.
+
+### Git
+- **Purpose:** stage, commit, (later) open PRs.
+- **Inputs:** `generated_code`, `user_request`. **Outputs:** commit message.
+- **Future:** real git ops + PR creation via the Git tool.
+
+## Status
 
 Every agent is a **runnable skeleton**: real role, prompt, router wiring, and
 structured I/O, with deterministic placeholder logic where full LLM
 intelligence lands later. The graph executes end-to-end (verified by the test
 suite, including the reflection loop). Real intelligence, tools, memory, and
-sandboxing arrive in Phases 4–9.
+sandboxing arrive in later phases ([roadmap.md](roadmap.md)).

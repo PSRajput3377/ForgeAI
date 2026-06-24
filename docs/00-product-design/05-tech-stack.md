@@ -1,7 +1,7 @@
 # 05 — Tech Stack (Final / Locked)
 
 This stack is locked for the MVP. Changes go through an ADR in
-[`../DECISIONS.md`](../DECISIONS.md).
+[`../decisions.md`](../decisions.md).
 
 ## Frontend
 - **Next.js** — app framework

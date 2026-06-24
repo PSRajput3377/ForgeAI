@@ -1,0 +1,20 @@
+%% The LangGraph agent workflow, including the bounded reflection retry loop.
+%% Source of truth: packages/agents/workflow.py
+flowchart TD
+    START([START]) --> INTAKE[Manager: intake]
+    INTAKE --> PLANNER[Planner]
+    PLANNER --> RESEARCH[Researcher]
+    RESEARCH --> MEMORY[Memory]
+    MEMORY --> CODER[Coder]
+    CODER --> EXECUTE[Execution]
+    EXECUTE --> TESTS[Testing]
+    TESTS --> REVIEW[Review]
+
+    REVIEW -->|approved| GIT[Git]
+    REVIEW -->|changes & retries left| REFLECTION[Reflection]
+    REVIEW -->|changes & retries exhausted| GIT
+
+    REFLECTION --> CODER
+
+    GIT --> FINAL[Manager: final]
+    FINAL --> END([END])

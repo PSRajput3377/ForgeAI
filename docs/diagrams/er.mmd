@@ -1,0 +1,49 @@
+%% Database entity-relationship diagram (MVP schema). Source: docs/database.md
+erDiagram
+    users ||--o{ projects : "creates"
+    projects ||--o{ sessions : "has"
+    projects ||--o{ tasks : "has"
+    sessions ||--o{ messages : "contains"
+    tasks ||--o{ tool_calls : "produces"
+
+    users {
+        uuid id PK
+        text email UK
+        text password_hash
+        timestamptz created_at
+    }
+    projects {
+        uuid id PK
+        text name
+        text description
+        text path
+        uuid created_by FK
+        timestamptz created_at
+    }
+    sessions {
+        uuid id PK
+        uuid project_id FK
+        timestamptz created_at
+    }
+    messages {
+        uuid id PK
+        uuid session_id FK
+        text role
+        text content
+        timestamptz created_at
+    }
+    tasks {
+        uuid id PK
+        uuid project_id FK
+        text status
+        text agent
+        timestamptz created_at
+    }
+    tool_calls {
+        uuid id PK
+        uuid task_id FK
+        text tool
+        jsonb input
+        jsonb output
+        timestamptz created_at
+    }

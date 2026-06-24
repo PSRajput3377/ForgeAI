@@ -55,12 +55,21 @@ The project is being built in 12 phases. See the
 | 10    | Deployment                   | ⬜ Not started |
 
 > Note: the phase order was revised in Phase 2 to front-load the AI engine
-> (the product's core). See `docs/DECISIONS.md`.
+> (the product's core). See `docs/decisions.md`.
 
 ## Documentation
 
-The full product design lives in [`docs/00-product-design/`](docs/00-product-design/).
-Architectural decisions are logged in [`docs/DECISIONS.md`](docs/DECISIONS.md).
+ForgeAI is documented so you can understand it **without reading the source**.
+
+- **[`docs/`](docs/README.md)** — how it works: architecture, agents, workflows,
+  shared state, tools, database, API, prompts, security, testing, deployment,
+  plus Mermaid diagrams and an [ADR log](docs/adr/README.md).
+- **[`specs/`](specs/README.md)** — what each component must do: the checkable
+  contracts (agent, tool, state, API, prompt, evaluation, v1.0 acceptance).
+- **[`docs/00-product-design/`](docs/00-product-design/)** — the original
+  product vision (Phase 0).
+
+The "why" behind each technology choice is in [`docs/decisions.md`](docs/decisions.md).
 
 ## Tech stack (at a glance)
 

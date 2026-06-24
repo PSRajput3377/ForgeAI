@@ -21,4 +21,4 @@ The canonical phase roadmap lives in
 
 > The original roadmap placed Authentication/Database earlier and split the
 > agent work across later phases. Phase 2 front-loaded the AI engine (the core
-> of the product), so subsequent phases were reordered. See `DECISIONS.md`.
+> of the product), so subsequent phases were reordered. See `decisions.md`.

@@ -1,0 +1,34 @@
+%% Request lifecycle across the agent team (happy path).
+sequenceDiagram
+    actor User
+    participant API as FastAPI (/agents/run)
+    participant MGR as Manager
+    participant PLN as Planner
+    participant RES as Researcher
+    participant MEM as Memory
+    participant COD as Coder
+    participant EXE as Execution
+    participant TST as Testing
+    participant REV as Review
+    participant GIT as Git
+
+    User->>API: POST /agents/run { user_request }
+    API->>MGR: intake(state)
+    MGR->>PLN: delegate
+    PLN-->>MGR: tasks[]
+    MGR->>RES: delegate
+    RES-->>MGR: retrieved_docs
+    MGR->>MEM: delegate
+    MEM-->>MGR: project_context
+    MGR->>COD: delegate
+    COD-->>MGR: generated_code
+    MGR->>EXE: delegate
+    EXE-->>MGR: execution_logs
+    MGR->>TST: delegate
+    TST-->>MGR: test_passed
+    MGR->>REV: delegate
+    REV-->>MGR: review_verdict
+    MGR->>GIT: delegate
+    GIT-->>MGR: commit prepared
+    MGR-->>API: final_response
+    API-->>User: RunResponse

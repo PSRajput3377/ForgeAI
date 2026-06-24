@@ -1,0 +1,37 @@
+%% ForgeAI system architecture — layers from user to infrastructure.
+flowchart TD
+    User([User])
+
+    subgraph Frontend["Frontend — apps/web"]
+        Web[Next.js 15 / React 19]
+    end
+
+    subgraph Backend["Backend — apps/api (FastAPI)"]
+        API[API Routes]
+        SVC[Service Layer]
+        RT[agents_runtime]
+    end
+
+    subgraph Engine["AI Engine — packages/"]
+        MGR[Manager Agent]
+        WF[LangGraph Workflow]
+        AG[Specialist Agents]
+        TOOLS[Tool Layer]
+        ROUTER[Model Router]
+    end
+
+    subgraph Infra["Infrastructure"]
+        OLL[(Ollama)]
+        PG[(PostgreSQL)]
+        REDIS[(Redis)]
+        QD[(Qdrant)]
+    end
+
+    User --> Web --> API --> SVC --> RT --> WF
+    WF --> MGR
+    WF --> AG
+    AG --> TOOLS
+    AG --> ROUTER --> OLL
+    SVC --> PG
+    SVC --> REDIS
+    AG --> QD

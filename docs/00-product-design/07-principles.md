@@ -19,5 +19,5 @@ These rules hold for the entire project, every phase.
 ## How we apply them
 
 - A phase isn't "done" until its code **and** its docs are committed.
-- New cross-cutting decisions get an entry in [`../DECISIONS.md`](../DECISIONS.md).
+- New cross-cutting decisions get an ADR in [`../adr/`](../adr/README.md).
 - If a feature isn't in [`06-mvp-scope.md`](06-mvp-scope.md), it waits.
