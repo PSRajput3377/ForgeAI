@@ -13,7 +13,7 @@ The canonical phase roadmap lives in
 | 2.5   | System Design & Documentation  | ✅ Complete    |
 | 3     | Tool System & Action Engine    | ✅ Complete    |
 | 4     | Memory, RAG & Knowledge Engine | ✅ Complete    |
-| 5     | Docker Sandbox                 | ⬜ Not started |
+| 5     | Autonomous Execution & Docker Sandbox | ✅ Complete |
 | 6     | GitHub Integration             | ⬜ Not started |
 | 7     | Authentication                 | ⬜ Not started |
 | 8     | Database                       | ⬜ Not started |

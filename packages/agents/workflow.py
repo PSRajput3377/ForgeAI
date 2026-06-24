@@ -39,19 +39,22 @@ def _after_review(state: ProjectState) -> str:
     return "git"  # give up gracefully; Manager reports the non-approval
 
 
-def build_workflow(router: ModelRouter, context_builder=None):
+def build_workflow(router: ModelRouter, context_builder=None, engine_factory=None):
     """Compile and return the agent workflow graph for a given ModelRouter.
 
     If ``context_builder`` is provided (Phase 4 Memory + RAG), the Memory agent
     uses it to assemble scored memories + RAG hits; otherwise it falls back to
     lightweight behavior so the graph still runs offline.
+
+    If ``engine_factory`` is provided (Phase 5), the Execution agent runs the
+    real build/test loop in a sandbox; otherwise it simulates execution.
     """
     manager = ManagerAgent(router)
     planner = PlannerAgent(router)
     researcher = ResearcherAgent(router)
     memory = MemoryAgent(router, context_builder=context_builder)
     coder = CoderAgent(router)
-    execution = ExecutionAgent(router)
+    execution = ExecutionAgent(router, engine_factory=engine_factory)
     testing = TestingAgent(router)
     review = ReviewAgent(router)
     reflection = ReflectionAgent(router)

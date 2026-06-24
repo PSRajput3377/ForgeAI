@@ -170,7 +170,12 @@ shared state. Formal acceptance criteria live in
 ### Execution
 - **Purpose:** run install/build/test commands, collect logs/exit codes.
   Runs **only inside Docker**.
-- **Inputs:** `generated_code`, `project_path`. **Outputs:** `execution_logs`.
+- **Inputs:** `generated_code`, `project_path`. **Outputs:** `execution_logs`,
+  `test_passed`.
+- **Implementation:** when wired with an `engine_factory` (Phase 5), it drives
+  the `ExecutionEngine` — running the project's profile in an isolated sandbox
+  with the self-correcting retry loop — and sets `test_passed` from the
+  `RunRecord`. Otherwise it simulates. See [execution.md](execution.md).
 
 ### Testing
 - **Purpose:** run tests, validate outputs, report pass/fail with evidence.
