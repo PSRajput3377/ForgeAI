@@ -216,8 +216,8 @@ action (§8), never automatic.
 
 **Foundation (Phase 12 ships these):**
 
-- [ ] Every run produces a versioned, rubric-scored `Evaluation` record offline.
-- [ ] Per-agent stats are derivable and sliceable by agent / prompt version / model.
+- [x] Every run produces a versioned, rubric-scored `Evaluation` record offline.
+- [x] Per-agent stats are derivable and sliceable by agent / prompt version / model.
 - [ ] Prompts are versioned and addressable; `system_prompt(role)` is unchanged
       for callers; each run records the versions it used.
 - [ ] Reflection stores failures and reuses a matching past fix on recurrence.

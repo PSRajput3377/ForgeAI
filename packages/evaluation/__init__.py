@@ -12,6 +12,7 @@ real models or services required. See ``specs/self-improvement-spec.md``.
 
 from evaluation.engine import EvaluationEngine, extract_review_score
 from evaluation.rubric import ACTIVE_RUBRIC, score_v1
+from evaluation.stats import Stats, aggregate, by_prompt_version
 from evaluation.store import EvaluationStore
 from evaluation.types import Evaluation
 
@@ -20,6 +21,9 @@ __all__ = [
     "Evaluation",
     "EvaluationEngine",
     "EvaluationStore",
+    "Stats",
+    "aggregate",
+    "by_prompt_version",
     "extract_review_score",
     "score_v1",
 ]

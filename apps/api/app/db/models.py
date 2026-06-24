@@ -14,7 +14,17 @@ import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -184,3 +194,36 @@ class Comment(Base, TimestampMixin):
     project_id: Mapped[str] = mapped_column(ForeignKey("projects.id"), index=True)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
     body: Mapped[str] = mapped_column(Text)
+
+
+class EvaluationRecord(Base, TimestampMixin):
+    """A persisted run score (Phase 12.2 — the ``evaluations`` table).
+
+    One row per scored run, mirroring the ``evaluation.Evaluation`` pydantic
+    model. Per-agent aggregates are *derived* from these rows at read time
+    (``evaluation.stats``), never stored separately — so they can't drift
+    (ADR-0025, spec §2). ``pr_accepted`` is nullable: backfilled when a PR's
+    outcome is known (spec §10).
+    """
+
+    __tablename__ = "evaluations"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    run_id: Mapped[str] = mapped_column(String(64), index=True)
+    task: Mapped[str] = mapped_column(Text)
+
+    success: Mapped[bool] = mapped_column(Boolean)
+    tests_passed: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+    review_score: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    retries: Mapped[int] = mapped_column(Integer, default=0)
+
+    execution_time_s: Mapped[float] = mapped_column(Float, default=0.0)
+    tokens: Mapped[int] = mapped_column(Integer, default=0)
+
+    prompt_versions: Mapped[dict] = mapped_column(JSON, default=dict)
+    model_routing: Mapped[dict] = mapped_column(JSON, default=dict)
+
+    pr_accepted: Mapped[bool | None] = mapped_column(Boolean, nullable=True)
+
+    score: Mapped[float] = mapped_column(Float)
+    rubric_version: Mapped[str] = mapped_column(String(16))

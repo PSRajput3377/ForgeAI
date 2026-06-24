@@ -1,15 +1,17 @@
 """Evaluation store — append-only log of run scores, behind one interface.
 
-Phase 12.1 ships the in-memory store (offline-testable); the PostgreSQL-backed
-store (the ``evaluations`` table, sub-phase 12.2) lands behind the same shape,
-exactly as ``observability/store.py`` did for events (ADR-0017).
+Phase 12.1 shipped the in-memory store; 12.2 adds the PostgreSQL-backed store
+(``apps/api/app/performance.py``) behind the same shape, exactly as
+``observability/store.py`` did for events (ADR-0017, ADR-0025).
 
-Per spec §2, per-agent aggregates are *derived* here, never stored as an
-independent writable source of truth that could drift from the records.
+Per spec §2, per-agent aggregates are *derived* (via ``evaluation.stats``),
+never stored as an independent writable source of truth that could drift from
+the records. Both stores call the same pure aggregation functions.
 """
 
 from __future__ import annotations
 
+from evaluation.stats import Stats, aggregate, by_prompt_version
 from evaluation.types import Evaluation
 
 
@@ -32,15 +34,21 @@ class EvaluationStore:
                 return evaluation
         return None
 
+    # --- derived aggregates (spec §2) ---------------------------------------
+
+    def stats(self) -> Stats:
+        """Rollup across all records."""
+        return aggregate(self._evals)
+
+    def prompt_version_stats(self, role: str) -> dict[str, Stats]:
+        """Stats grouped by the prompt version ``role`` used."""
+        return by_prompt_version(self._evals, role)
+
     def mean_score(self) -> float:
-        """Average score across all records (0.0 when empty)."""
-        return (sum(e.score for e in self._evals) / len(self._evals)) if self._evals else 0.0
+        return self.stats().mean_score
 
     def success_rate(self) -> float:
-        """Fraction of runs that succeeded (0.0 when empty)."""
-        if not self._evals:
-            return 0.0
-        return sum(1 for e in self._evals if e.success) / len(self._evals)
+        return self.stats().success_rate
 
     def by_prompt_version(self, role: str, version: str) -> list[Evaluation]:
         """Records where ``role`` ran a given prompt version (for 12.3/12.8)."""
