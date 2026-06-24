@@ -1,12 +1,23 @@
-"""System prompts for every agent role.
+"""System prompts for every agent role — versioned and addressable (Phase 12.3).
 
 Different prompts = specialized behavior. These encode the responsibilities and
 hard rules from the Phase 2 design (e.g. the Manager and Planner never write
 code; the Coder only writes code).
+
+Prompts are **versioned**: each role has one or more named versions with exactly
+one marked active. Versions are **append-only** — improving a prompt registers a
+new version (``v2``), never edits ``v1`` — so historical evaluations stay
+interpretable (which prompt produced which result; ADR-0025, spec §3).
+``system_prompt(role)`` returns the active version's text and is unchanged for
+callers; ``active_version(role)`` reports which version that is, for recording
+on the ``Evaluation``.
 """
 
 from core.roles import AgentRole
 
+# The original (v1) bodies. Kept as a flat dict for backward compatibility:
+# external code may still import ``PROMPTS``; ``system_prompt`` resolves through
+# the registry below.
 PROMPTS: dict[AgentRole, str] = {
     AgentRole.MANAGER: (
         "You are the Engineering Manager of an AI software team.\n"
@@ -68,6 +79,77 @@ PROMPTS: dict[AgentRole, str] = {
 }
 
 
+class PromptRegistry:
+    """Append-only, versioned store of agent prompts with one active version each.
+
+    Seeded with the ``v1`` bodies above. ``register`` adds a new named version
+    (and may activate it); it refuses to overwrite an existing version, keeping
+    the history immutable.
+    """
+
+    def __init__(self, seed: dict[AgentRole, str] | None = None) -> None:
+        # role -> {version -> body}
+        self._versions: dict[AgentRole, dict[str, str]] = {}
+        # role -> active version name
+        self._active: dict[AgentRole, str] = {}
+        for role, body in (seed if seed is not None else PROMPTS).items():
+            self._versions[role] = {"v1": body}
+            self._active[role] = "v1"
+
+    def register(self, role: AgentRole, version: str, body: str, *, activate: bool = True) -> None:
+        """Add a new prompt version. Versions are append-only.
+
+        Raises ``ValueError`` if ``version`` already exists for ``role`` — an
+        existing version must never be mutated (spec §3).
+        """
+        versions = self._versions.setdefault(role, {})
+        if version in versions:
+            raise ValueError(
+                f"prompt {role.value}/{version} already exists (versions are immutable)"
+            )
+        versions[version] = body
+        if activate or role not in self._active:
+            self._active[role] = version
+
+    def activate(self, role: AgentRole, version: str) -> None:
+        """Mark an existing version active. Raises ``KeyError`` if unknown."""
+        if version not in self._versions.get(role, {}):
+            raise KeyError(f"no prompt {role.value}/{version}")
+        self._active[role] = version
+
+    def get(self, role: AgentRole, version: str | None = None) -> str:
+        """Body for a role — the active version unless one is named."""
+        version = version or self._active[role]
+        return self._versions[role][version]
+
+    def active_version(self, role: AgentRole) -> str:
+        """The active version name for a role (recorded on the Evaluation)."""
+        return self._active[role]
+
+    def versions(self, role: AgentRole) -> list[str]:
+        """All version names registered for a role, in insertion order."""
+        return list(self._versions.get(role, {}))
+
+    def active_versions(self) -> dict[str, str]:
+        """role value -> active version, for every role (run provenance)."""
+        return {role.value: version for role, version in self._active.items()}
+
+
+# Process-wide default registry. ``system_prompt`` resolves through it so the
+# active version is a single source of truth shared by every agent.
+REGISTRY = PromptRegistry()
+
+
 def system_prompt(role: AgentRole) -> str:
-    """Return the system prompt for an agent role."""
-    return PROMPTS[role]
+    """Return the active system prompt for an agent role (backward compatible)."""
+    return REGISTRY.get(role)
+
+
+def active_version(role: AgentRole) -> str:
+    """Return the active prompt version name for a role."""
+    return REGISTRY.active_version(role)
+
+
+def active_versions() -> dict[str, str]:
+    """Return the active prompt version for every role (run provenance)."""
+    return REGISTRY.active_versions()

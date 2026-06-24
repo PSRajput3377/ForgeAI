@@ -192,8 +192,13 @@ async def run_workflow(
         )
     if evaluation_store is not None:
         from evaluation import EvaluationEngine
+        from prompts import active_versions
 
         evaluation_store.add(
-            EvaluationEngine().evaluate(final, execution_time_s=loop.time() - started)
+            EvaluationEngine().evaluate(
+                final,
+                execution_time_s=loop.time() - started,
+                prompt_versions=active_versions(),
+            )
         )
     return final
