@@ -79,6 +79,7 @@ def build_workflow(
     bus=None,
     github_workflow=None,
     github_repo=None,
+    failure_store=None,
 ):
     """Compile and return the agent workflow graph for a given ModelRouter.
 
@@ -95,6 +96,10 @@ def build_workflow(
     If ``github_workflow`` + ``github_repo`` are provided (Phase 8.2), the Git
     agent proposes a gated PR (opens an approval request, writes nothing);
     otherwise it only drafts a commit message.
+
+    If ``failure_store`` is provided (Phase 12.4), the Reflection agent consults
+    the Failure Knowledge Base by error signature and reuses a known-good fix on
+    recurrence; otherwise it diagnoses from scratch every time.
     """
     manager = ManagerAgent(router)
     planner = PlannerAgent(router)
@@ -104,7 +109,7 @@ def build_workflow(
     execution = ExecutionAgent(router, engine_factory=engine_factory)
     testing = TestingAgent(router)
     review = ReviewAgent(router)
-    reflection = ReflectionAgent(router)
+    reflection = ReflectionAgent(router, failure_store=failure_store)
     git = GitAgent(router, workflow=github_workflow, repo=github_repo)
 
     graph = StateGraph(ProjectState)
@@ -153,13 +158,15 @@ async def run_workflow(
     github_workflow=None,
     github_repo=None,
     evaluation_store=None,
+    failure_store=None,
     **state_kwargs,
 ) -> ProjectState:
     """Run the full workflow for a request and return the final ProjectState.
 
     If ``evaluation_store`` is provided (Phase 12.1), the finished run is scored
-    by the ``EvaluationEngine`` and the record appended to the store. Off by
-    default, so the offline path is unchanged.
+    by the ``EvaluationEngine`` and the record appended to the store. If
+    ``failure_store`` is provided (Phase 12.4), Reflection reuses known fixes.
+    Both off by default, so the offline path is unchanged.
     """
     app = build_workflow(
         router,
@@ -168,6 +175,7 @@ async def run_workflow(
         bus=bus,
         github_workflow=github_workflow,
         github_repo=github_repo,
+        failure_store=failure_store,
     )
     initial = ProjectState(user_request=user_request, **state_kwargs)
     loop = asyncio.get_event_loop()

@@ -220,7 +220,7 @@ action (§8), never automatic.
 - [x] Per-agent stats are derivable and sliceable by agent / prompt version / model.
 - [x] Prompts are versioned and addressable; `system_prompt(role)` is unchanged
       for callers; each run records the versions it used.
-- [ ] Reflection stores failures and reuses a matching past fix on recurrence.
+- [x] Reflection stores failures and reuses a matching past fix on recurrence.
 - [ ] A versioned benchmark suite + harness runs offline (echo) and on real models.
 - [ ] Multi-agent debate runs behind a config flag, off by default, deterministic
       under `EchoModel`.

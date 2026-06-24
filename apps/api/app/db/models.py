@@ -227,3 +227,19 @@ class EvaluationRecord(Base, TimestampMixin):
 
     score: Mapped[float] = mapped_column(Float)
     rubric_version: Mapped[str] = mapped_column(String(16))
+
+
+class FailureRecord(Base, TimestampMixin):
+    """A persisted Failure Knowledge Base entry (Phase 12.4 — the ``failures``
+    table). Error → cause → fix → outcome, keyed by a normalized signature so
+    recurring errors collide on one entry (spec §4, §7)."""
+
+    __tablename__ = "failures"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    signature: Mapped[str] = mapped_column(String(128), index=True)
+    error: Mapped[str] = mapped_column(Text)
+    cause: Mapped[str] = mapped_column(Text, default="")
+    fix: Mapped[str] = mapped_column(Text, default="")
+    outcome: Mapped[str] = mapped_column(String(16), default="unknown")
+    hits: Mapped[int] = mapped_column(Integer, default=1)
