@@ -226,8 +226,23 @@ curl -s -X POST localhost:8000/github/pr/<approval_id>/execute -H 'Content-Type:
 The **PR Approval Center** (`apps/web` `/workspace`) is the UI centerpiece:
 pending proposals from the agent pipeline, each with **Review** (inline diff
 viewer), **Approve** (one-click → executes the workflow → shows the PR URL), and
-**Reject**. The proposal's plan is stored server-side, so approve+execute needs
-only the `approval_id`. Nothing reaches GitHub without an explicit Approve.
+**Reject**. The proposal's plan is **persisted in PostgreSQL** (`pr_approvals`
+table, ADR-0024), so it survives a restart and approve+execute needs only the
+`approval_id`. Nothing reaches GitHub without an explicit Approve.
+
+### Hero demo (real GitHub)
+
+With a sandbox repo + `GITHUB_TOKEN`, `scripts/demo-pr.sh` drives the whole
+flow through the API — propose → (refused without approval) → approve →
+execute → **real PR URL**:
+
+```bash
+make up   # GITHUB_TOKEN set in .env
+OWNER=youruser REPO=forgeai-sandbox-demo bash scripts/demo-pr.sh
+```
+
+This is the recording to capture: *"Add JWT Authentication" → proposal →
+approval → branch → commit → PR → GitHub URL.*
 
 ## Live validation
 

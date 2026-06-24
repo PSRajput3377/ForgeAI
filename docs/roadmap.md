@@ -21,7 +21,7 @@ The canonical phase roadmap lives in
 | 8.2   | GitHub Write Workflow (approval-gated propose→approve→execute PR) | ✅ Complete |
 | 9     | Enterprise Integrations & Ecosystem | ✅ Complete |
 | 10    | Production: Scale, Security & Reliability | ✅ Complete |
-| 11    | Dashboard (PR Approval Center, diff viewer, one-click approve) | 🟡 In progress |
+| 11    | Dashboard (PR Approval Center, timestamped timeline, persisted approvals) | ✅ Complete (live GitHub demo pending a token) |
 | —     | Deployment                     | ⬜ Not started |
 
 > Database work (async SQLAlchemy, ADR-0018) landed inside Phase 7 because

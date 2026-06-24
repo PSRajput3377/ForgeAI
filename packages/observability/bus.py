@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Awaitable, Callable
+from datetime import UTC
 
 from observability.events import Event
 
@@ -35,9 +36,13 @@ class EventBus:
         return unsubscribe
 
     async def publish(self, event: Event) -> Event:
-        """Stamp the event with the next tick and fan it out to subscribers."""
+        """Stamp the event with the next tick + wall-clock time, then fan out."""
         self._tick += 1
         event.tick = self._tick
+        if event.timestamp is None:
+            from datetime import datetime
+
+            event.timestamp = datetime.now(UTC).isoformat()
         for sub in list(self._subscribers):
             try:
                 result = sub(event)

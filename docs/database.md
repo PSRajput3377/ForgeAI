@@ -26,6 +26,7 @@ projects ──< comments
 | `approvals` | id, workspace_id, action, requested_by, approved_by, status |
 | `activity` | id, workspace_id, user_id, action, detail (audit + feed) |
 | `comments` | id, project_id, user_id, body |
+| `pr_approvals` | id, status, repository, owner, name, pr_title, pr_plan (JSON), pr_url, decided_by — persisted PR approvals (ADR-0024) |
 
 RBAC roles rank `owner > admin > member > viewer`. See [auth.md](auth.md).
 

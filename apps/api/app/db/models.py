@@ -14,7 +14,7 @@ import uuid
 from datetime import UTC, datetime
 from enum import StrEnum
 
-from sqlalchemy import DateTime, ForeignKey, String, Text, UniqueConstraint
+from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.base import Base
@@ -140,6 +140,27 @@ class Approval(Base, TimestampMixin):
     requested_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
     approved_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
     status: Mapped[ApprovalStatus] = mapped_column(String(16), default=ApprovalStatus.PENDING)
+
+
+class PRApproval(Base, TimestampMixin):
+    """A persisted GitHub PR approval request.
+
+    Stores the full PR plan + repo so a proposal survives a restart and can be
+    approved/executed later by id alone. (Initially in-memory for rapid
+    iteration; persisted here for durability — ADR-0024.)
+    """
+
+    __tablename__ = "pr_approvals"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    status: Mapped[ApprovalStatus] = mapped_column(String(16), default=ApprovalStatus.PENDING)
+    repository: Mapped[str] = mapped_column(String(255))  # "owner/name"
+    owner: Mapped[str] = mapped_column(String(255))
+    name: Mapped[str] = mapped_column(String(255))
+    pr_title: Mapped[str] = mapped_column(String(255))
+    pr_plan: Mapped[dict] = mapped_column(JSON)  # serialized PRPlan
+    pr_url: Mapped[str | None] = mapped_column(String(512), nullable=True)
+    decided_by: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
 
 class Activity(Base, TimestampMixin):

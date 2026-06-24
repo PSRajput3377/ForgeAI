@@ -32,6 +32,7 @@ this folder is the formal record.
 | [0021](ADR-0021.md) | Uniform connector abstraction behind an Integration Hub | Accepted | 9 |
 | [0022](ADR-0022.md) | Queue-based execution + reliability primitives behind interfaces | Accepted | 10 |
 | [0023](ADR-0023.md) | GitHub writes are human-gated (propose → approve → execute) | Accepted | 8.2 |
+| [0024](ADR-0024.md) | Persist PR approvals in PostgreSQL | Accepted | 11 |
 
 ## Template
 

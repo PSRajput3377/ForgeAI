@@ -7,22 +7,18 @@ repo you point it at, so use a sandbox.
 
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
-from github.approval import ApprovalService
+from fastapi import APIRouter, Depends, HTTPException
 from github.manager import GitHubManager
-from github.workflow import GitHubWorkflow, PRPlan
+from github.workflow import PRPlan
 from pydantic import BaseModel, Field
+from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.db.base import get_session
+from app.db.models import ApprovalStatus, PRApproval
 from app.github_runtime import build_provider, github_configured
+from app.pr_approvals import PRApprovalStore
 
 router = APIRouter(prefix="/github", tags=["github"])
-
-# Process-wide approval service + workflow (the governance layer for writes).
-_approvals = ApprovalService()
-
-
-def _workflow() -> GitHubWorkflow:
-    return GitHubWorkflow(GitHubManager(build_provider()), _approvals)
 
 
 class RepoRef(BaseModel):
@@ -73,12 +69,7 @@ async def get_pull_request(owner: str, name: str, number: int) -> dict:
     return pr.model_dump()
 
 
-# --- approval-gated write workflow (Phase 8.2 / 11) ---
-
-# In-process registry of proposals so the UI can list pending approvals, show
-# diffs, and execute by approval_id alone (true one-click approve). A row holds
-# the repo coordinates + the PRPlan behind each approval request.
-_proposals: dict[str, dict] = {}
+# --- approval-gated write workflow (Phase 8.2 / 11), persisted to PostgreSQL ---
 
 
 class ProposePR(BaseModel):
@@ -110,61 +101,53 @@ def _plan_from(body: ProposePR) -> PRPlan:
     )
 
 
-def _proposal_view(approval_id: str) -> dict:
-    row = _proposals[approval_id]
-    plan: PRPlan = row["plan"]
-    req = _approvals.get(approval_id)
+def _view(row: PRApproval) -> dict:
+    plan = PRApprovalStore.plan_of(row)
     return {
-        "approval_id": approval_id,
-        "status": req.status.value if req else "unknown",
-        "repo": row["repo"],
+        "approval_id": row.id,
+        "status": ApprovalStatus(row.status).value,
+        "repo": row.repository,
         "task": plan.task,
         "branch": plan.branch,
         "pr_title": plan.pr_title,
         "pr_summary": plan.pr_summary,
         "files_changed": sorted(plan.files.keys()),
         "testing": plan.testing,
-        "pr_url": row.get("pr_url"),
+        "pr_url": row.pr_url,
     }
 
 
 @router.post("/pr/propose", status_code=201)
-async def propose_pr(body: ProposePR) -> dict:
-    """Propose a PR — opens an approval request. Writes NOTHING to GitHub."""
-    wf = _workflow()
-    repo = await build_provider().get_repository(body.owner, body.name)
-    plan = _plan_from(body)
-    req = wf.propose(repo, plan)
-    _proposals[req.id] = {
-        "plan": plan,
-        "repo": repo.full_name,
-        "owner": body.owner,
-        "name": body.name,
-    }
-    return _proposal_view(req.id)
+async def propose_pr(body: ProposePR, session: AsyncSession = Depends(get_session)) -> dict:
+    """Propose a PR — persists a pending approval. Writes NOTHING to GitHub."""
+    store = PRApprovalStore(session)
+    row = await store.create(body.owner, body.name, _plan_from(body))
+    return _view(row)
 
 
 @router.get("/pr/pending")
-def list_pending() -> dict:
+async def list_pending(session: AsyncSession = Depends(get_session)) -> dict:
     """All pending PR proposals — the Approval Center's data source."""
-    pending_ids = {r.id for r in _approvals.pending()}
-    return {"pending": [_proposal_view(i) for i in _proposals if i in pending_ids]}
+    store = PRApprovalStore(session)
+    return {"pending": [_view(r) for r in await store.pending()]}
 
 
 @router.get("/pr/{approval_id}")
-def get_proposal(approval_id: str) -> dict:
+async def get_proposal(approval_id: str, session: AsyncSession = Depends(get_session)) -> dict:
     """A single proposal (metadata + changed files)."""
-    if approval_id not in _proposals:
+    row = await PRApprovalStore(session).get(approval_id)
+    if row is None:
         raise HTTPException(404, "No such proposal")
-    return _proposal_view(approval_id)
+    return _view(row)
 
 
 @router.get("/pr/{approval_id}/diff")
-def get_diff(approval_id: str) -> dict:
+async def get_diff(approval_id: str, session: AsyncSession = Depends(get_session)) -> dict:
     """The proposed file contents — powers the Diff Viewer before approval."""
-    if approval_id not in _proposals:
+    row = await PRApprovalStore(session).get(approval_id)
+    if row is None:
         raise HTTPException(404, "No such proposal")
-    plan: PRPlan = _proposals[approval_id]["plan"]
+    plan = PRApprovalStore.plan_of(row)
     return {
         "approval_id": approval_id,
         "files": [{"path": p, "content": c} for p, c in sorted(plan.files.items())],
@@ -172,36 +155,53 @@ def get_diff(approval_id: str) -> dict:
 
 
 @router.post("/pr/{approval_id}/approve")
-def approve_pr(approval_id: str) -> dict:
+async def approve_pr(approval_id: str, session: AsyncSession = Depends(get_session)) -> dict:
     """Approve a pending PR proposal."""
     try:
-        _approvals.approve(approval_id)
-    except (KeyError, ValueError) as exc:
+        row = await PRApprovalStore(session).decide(approval_id, ApprovalStatus.APPROVED, by=None)
+    except KeyError as exc:
+        raise HTTPException(404, "No such proposal") from exc
+    except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
-    return _proposal_view(approval_id)
+    return _view(row)
 
 
 @router.post("/pr/{approval_id}/reject")
-def reject_pr(approval_id: str) -> dict:
+async def reject_pr(approval_id: str, session: AsyncSession = Depends(get_session)) -> dict:
     """Reject a pending PR proposal."""
     try:
-        _approvals.reject(approval_id)
-    except (KeyError, ValueError) as exc:
+        row = await PRApprovalStore(session).decide(approval_id, ApprovalStatus.REJECTED, by=None)
+    except KeyError as exc:
+        raise HTTPException(404, "No such proposal") from exc
+    except ValueError as exc:
         raise HTTPException(400, str(exc)) from exc
-    return _proposal_view(approval_id)
+    return _view(row)
 
 
 @router.post("/pr/{approval_id}/execute")
-async def execute_pr(approval_id: str) -> dict:
+async def execute_pr(approval_id: str, session: AsyncSession = Depends(get_session)) -> dict:
     """One-click: create the PR from the stored plan — only if approved."""
-    if approval_id not in _proposals:
+    store = PRApprovalStore(session)
+    row = await store.get(approval_id)
+    if row is None:
         raise HTTPException(404, "No such proposal")
-    row = _proposals[approval_id]
-    wf = _workflow()
-    repo = await build_provider().get_repository(row["owner"], row["name"])
-    try:
-        outcome = await wf.execute(repo, row["plan"], approval_id)
-    except PermissionError as exc:
-        raise HTTPException(403, str(exc)) from exc
-    row["pr_url"] = outcome.pr_url
-    return outcome.model_dump()
+    if ApprovalStatus(row.status) != ApprovalStatus.APPROVED:
+        raise HTTPException(403, f"Not approved (status={row.status}); refusing to write")
+
+    manager = GitHubManager(build_provider())
+    repo = await build_provider().get_repository(row.owner, row.name)
+    plan = PRApprovalStore.plan_of(row)
+
+    branch = await manager.create_branch(repo, plan.kind, plan.task)
+    await manager.create_commit(repo, branch.name, plan.commit_message, plan.files)
+    pr = await manager.create_pr(
+        repo,
+        title=plan.pr_title,
+        summary=plan.pr_summary,
+        changes=plan.changes,
+        testing=plan.testing,
+        head=branch.name,
+    )
+    url = f"https://github.com/{repo.full_name}/pull/{pr.number}"
+    await store.set_pr_url(approval_id, url)
+    return {"approved": True, "branch": branch.name, "pr_number": pr.number, "pr_url": url}

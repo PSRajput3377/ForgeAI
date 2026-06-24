@@ -10,6 +10,7 @@ export interface ForgeEvent {
   agent: string | null;
   payload: Record<string, unknown>;
   tick: number;
+  timestamp: string | null;
 }
 
 export async function getMetrics() {
