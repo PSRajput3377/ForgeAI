@@ -74,6 +74,21 @@ ForgeAI is documented so you can understand it **without reading the source**.
 
 The "why" behind each technology choice is in [`docs/decisions.md`](docs/decisions.md).
 
+## GitHub integration
+
+GitHub integration is implemented using a **provider abstraction**. The platform
+includes a deterministic `FakeGitHubProvider` used for offline testing and CI
+validation, alongside a production `RestGitHubProvider`.
+
+All autonomous workflows, CI failure classification, review pipelines, and
+safety rules are verified against the fake provider. Commits are authored on a
+**local clone via git** (not the REST API), which composes with the Docker
+sandbox, testing, reflection, review, and CI.
+
+Live GitHub functionality requires a valid `GITHUB_TOKEN` and is validated
+separately against **sandbox repositories** via
+[`scripts/verify-github.sh`](scripts/verify-github.sh) — never production repos.
+
 ## Tech stack (at a glance)
 
 **Frontend:** Next.js · React · TypeScript · Tailwind · shadcn/ui

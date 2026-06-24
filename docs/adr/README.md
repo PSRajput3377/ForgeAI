@@ -28,6 +28,7 @@ this folder is the formal record.
 | [0017](ADR-0017.md) | Event-driven observability with offline backends | Accepted | 6 |
 | [0018](ADR-0018.md) | Async SQLAlchemy with SQLite-in-memory for offline tests | Accepted | 7 |
 | [0019](ADR-0019.md) | GitHub provider abstraction with an offline fake | Accepted | 8 |
+| [0020](ADR-0020.md) | Author commits via local clone + git, not REST | Accepted | 8.1 |
 
 ## Template
 

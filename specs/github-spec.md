@@ -44,6 +44,24 @@ Contracts for GitHub integration. Narrative in
   performed.
 - Merge/delete/deploy MUST be gateable behind human approval.
 
+## Commit authoring (Phase 8.1)
+
+- Commits MUST be authored on a local clone via git (`LocalRepository`), not the
+  REST API (ADR-0020). REST `create_commit` MUST raise `NotImplementedError`.
+- File writes MUST go through the sandboxed FilesystemTool (path-escape safe).
+
+## Resilience (Phase 8.1)
+
+- The REST client MUST back off on 403/429 using `Retry-After` /
+  `X-RateLimit-Reset`, bounded by a retry cap (no infinite loop).
+- Collection reads MUST follow `Link: rel="next"` pagination, bounded by
+  `max_pages`.
+
+## Webhooks (Phase 8.1)
+
+- Inbound webhooks MUST be HMAC-verified (`X-Hub-Signature-256`) before use.
+- A failed-check webhook MUST map to a BUILD_FAILED event (push-not-poll).
+
 ## Acceptance criteria
 
 - [ ] Happy path: branch → commit → PR → approve → CI green → merge.
@@ -52,3 +70,7 @@ Contracts for GitHub integration. Narrative in
 - [ ] Review requesting changes blocks merge.
 - [ ] Conventional branch names; never commits to default branch.
 - [ ] Entire suite runs offline via FakeGitHubProvider.
+- [ ] Local clone → branch → commit → push verified with a bare local remote.
+- [ ] Rate-limit backoff + pagination unit-tested with a mock transport.
+- [ ] Webhook signature verification + event mapping tested.
+- [ ] Live sandbox validation documented (`scripts/verify-github.sh`).

@@ -105,10 +105,44 @@ this designed this way?").
 GitHub issues are listed via the provider and become Planner tasks, enabling the
 future fully-autonomous loop: *Issue → Planner → Coder → Tests → PR → Review*.
 
+## Authoring commits — local clone, not REST (ADR-0020)
+
+ForgeAI authors commits the way an engineer does, via `LocalRepository`:
+
+```
+clone → create branch → write files (sandboxed) → git add/commit → push
+```
+
+This composes naturally with the Docker sandbox (run/test the clone), Reflection
+(fix in place), Review, and CI (push triggers checks). The REST provider handles
+only refs/PRs/reviews/checks — its `create_commit` is deliberately
+`NotImplementedError`. Verified offline using a **bare local remote** (no token).
+
+## Hardening (Phase 8.1)
+
+Real GitHub differs from the fake in ways the fake can't surface — these are
+built and unit-tested with a mock transport:
+
+- **Rate limits** — `request_with_backoff` honors `Retry-After` /
+  `X-RateLimit-Reset` on 403/429 and backs off (bounded), then returns.
+- **Pagination** — `paginate` follows `Link: rel="next"` across pages (bounded
+  by `max_pages`), so 1000-PR / 10000-commit repos are handled.
+- **Webhooks** — `verify_signature` (HMAC `X-Hub-Signature-256`) + `map_webhook`
+  turn GitHub events into ForgeAI `Event`s, so a failed-check webhook can trigger
+  the CI fix loop by **push instead of poll**.
+
 ## Data model (planned tables)
 
 `repositories`, `branches`, `commits`, `pull_requests`, `reviews`, `ci_runs` —
 persisted via the Phase 7 async DB layer.
+
+## Live validation
+
+Offline tests cover all logic via the fake provider. Real GitHub is validated
+**separately against a sandbox repo** (never production) with
+`scripts/verify-github.sh`, which checks token identity, repo/read/write/PR
+scopes, pagination headers, rate-limit headers, and a full
+clone→branch→commit→push→PR→close cycle. Requires a valid `GITHUB_TOKEN`.
 
 ## Spec
 

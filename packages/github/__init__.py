@@ -8,6 +8,7 @@ CI failure analysis reuses the Phase 5 error classifier; CI self-correction
 mirrors the ExecutionEngine's injected-fixer pattern. (ADR-0019)
 """
 
+from github.local_repo import CommitResult, GitCommandError, LocalRepository
 from github.manager import CIFixer, GitHubManager, WorkflowResult
 from github.models import (
     Branch,
@@ -22,6 +23,12 @@ from github.models import (
     ReviewComment,
 )
 from github.provider import FakeGitHubProvider, GitHubProvider
+from github.rest_support import (
+    paginate,
+    parse_next_link,
+    request_with_backoff,
+    retry_after_seconds,
+)
 from github.services import (
     BranchService,
     CIService,
@@ -29,6 +36,7 @@ from github.services import (
     PullRequestService,
     branch_name_for,
 )
+from github.webhooks import map_webhook, verify_signature
 
 __all__ = [
     "Branch",
@@ -38,11 +46,14 @@ __all__ = [
     "CIService",
     "CIStatus",
     "Commit",
+    "CommitResult",
     "CommitService",
     "FakeGitHubProvider",
+    "GitCommandError",
     "GitHubManager",
     "GitHubProvider",
     "Issue",
+    "LocalRepository",
     "PRState",
     "PullRequest",
     "PullRequestService",
@@ -51,4 +62,10 @@ __all__ = [
     "ReviewComment",
     "WorkflowResult",
     "branch_name_for",
+    "map_webhook",
+    "paginate",
+    "parse_next_link",
+    "request_with_backoff",
+    "retry_after_seconds",
+    "verify_signature",
 ]

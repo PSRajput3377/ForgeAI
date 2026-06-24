@@ -38,6 +38,7 @@ class Settings(BaseSettings):
     # GitHub integration (Personal Access Token for the MVP)
     github_token: str = ""
     github_api_url: str = "https://api.github.com"
+    github_webhook_secret: str = ""  # HMAC secret for webhook verification
 
     # Model routing (Ollama, local)
     model_planner: str = "qwen3:8b"

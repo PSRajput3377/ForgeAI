@@ -17,6 +17,7 @@ The canonical phase roadmap lives in
 | 6     | Developer Workspace & Observability | ✅ Complete |
 | 7     | Auth, Multi-User Workspaces & Teams | ✅ Complete |
 | 8     | GitHub Integration & Autonomous Workflow | ✅ Complete |
+| 8.1   | GitHub Hardening (local commits, rate limits, pagination, webhooks) | ✅ Offline-verified; live sandbox pending |
 | 9     | Dashboard                      | ⬜ Not started |
 | 10    | Deployment                     | ⬜ Not started |
 
