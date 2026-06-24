@@ -222,7 +222,7 @@ action (§8), never automatic.
       for callers; each run records the versions it used.
 - [x] Reflection stores failures and reuses a matching past fix on recurrence.
 - [x] A versioned benchmark suite + harness runs offline (echo) and on real models.
-- [ ] Multi-agent debate runs behind a config flag, off by default, deterministic
+- [x] Multi-agent debate runs behind a config flag, off by default, deterministic
       under `EchoModel`.
 - [ ] Rule-based dynamic agent selection works and is recorded with rationale.
 - [ ] The Agent Analytics tab renders per-agent deltas and prompt comparison.
