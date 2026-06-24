@@ -35,6 +35,10 @@ class Settings(BaseSettings):
     access_token_minutes: int = 15  # short-lived access token
     refresh_token_days: int = 30  # long-lived refresh token
 
+    # GitHub integration (Personal Access Token for the MVP)
+    github_token: str = ""
+    github_api_url: str = "https://api.github.com"
+
     # Model routing (Ollama, local)
     model_planner: str = "qwen3:8b"
     model_coder: str = "deepseek-coder"

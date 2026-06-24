@@ -27,6 +27,7 @@ this folder is the formal record.
 | [0016](ADR-0016.md) | Sandbox abstraction with offline backends | Accepted | 5 |
 | [0017](ADR-0017.md) | Event-driven observability with offline backends | Accepted | 6 |
 | [0018](ADR-0018.md) | Async SQLAlchemy with SQLite-in-memory for offline tests | Accepted | 7 |
+| [0019](ADR-0019.md) | GitHub provider abstraction with an offline fake | Accepted | 8 |
 
 ## Template
 

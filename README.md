@@ -51,7 +51,7 @@ The project is being built in 12 phases. See the
 | 5     | Autonomous Execution & Docker Sandbox | ✅ Complete |
 | 6     | Developer Workspace & Observability | ✅ Complete |
 | 7     | Auth, Multi-User Workspaces & Teams | ✅ Complete |
-| 8     | GitHub Integration           | ⬜ Not started |
+| 8     | GitHub Integration & Autonomous Workflow | ✅ Complete |
 | 9     | Dashboard                    | ⬜ Not started |
 | 10    | Deployment                   | ⬜ Not started |
 
