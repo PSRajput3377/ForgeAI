@@ -13,7 +13,7 @@ WORKDIR /app/apps/api
 
 # Install dependencies first (better layer caching).
 COPY apps/api/pyproject.toml apps/api/uv.lock ./
-RUN uv sync --frozen --no-dev --system
+RUN uv sync --frozen --no-dev
 
 # Source is bind-mounted in development (see docker-compose.yml); copy as a
 # fallback so the image also runs standalone.
