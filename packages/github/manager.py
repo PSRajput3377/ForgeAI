@@ -47,6 +47,41 @@ class GitHubManager:
         self.ci = CIService(provider)
         self.max_ci_retries = max_ci_retries
 
+    # --- discrete operations (composable; used by GitHubWorkflow) ---
+
+    async def create_branch(self, repo, kind: str, task: str):
+        """Create a conventional task branch off the default branch."""
+        return await self.branches.create_task_branch(repo, kind, task)
+
+    async def create_commit(
+        self, repo, branch: str, message: str, files: dict[str, str]
+    ):
+        """Commit files to a branch."""
+        return await self.commits.commit(repo, branch, message, files)
+
+    async def create_pr(
+        self, repo, *, title, summary, changes, testing, head, base=None
+    ):
+        """Open a pull request with a structured body. Returns the PullRequest."""
+        return await self.prs.open(
+            repo,
+            title,
+            summary,
+            changes,
+            testing,
+            head=head,
+            base=base or repo.default_branch,
+        )
+
+    async def get_review_status(self, repo, pr_number: int):
+        """Return the current CI status + any classified failure for a PR."""
+        return await self.ci.poll(repo, pr_number)
+
+    async def sync_repository(self, repo):
+        """Refresh repo state (branches) — the hook for pull→re-index→memory."""
+        branches = await self.provider.list_branches(repo)
+        return {"branches": [b.name for b in branches]}
+
     async def run_task(
         self,
         repo: Repository,

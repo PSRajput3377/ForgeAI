@@ -62,9 +62,21 @@ Contracts for GitHub integration. Narrative in
 - Inbound webhooks MUST be HMAC-verified (`X-Hub-Signature-256`) before use.
 - A failed-check webhook MUST map to a BUILD_FAILED event (push-not-poll).
 
+## Approval-gated writes (Phase 8.2)
+
+- A write workflow MUST be two-phase: `propose` (no writes) → human decision →
+  `execute`.
+- `propose` MUST NOT create any branch/commit/PR; it MUST open a pending
+  approval request.
+- `execute` MUST refuse (raise / HTTP 403) unless the request is approved.
+- `ApprovalService` MUST track status (pending/approved/rejected) and MUST NOT
+  allow deciding an already-decided request.
+
 ## Acceptance criteria
 
 - [ ] Happy path: branch → commit → PR → approve → CI green → merge.
+- [ ] propose() writes nothing; execute() refused while pending or rejected.
+- [ ] execute() after approval creates the PR and returns its URL.
 - [ ] CI fails → classified → fixer → re-run → green → merge (bounded).
 - [ ] No fixer / red CI → not merged.
 - [ ] Review requesting changes blocks merge.

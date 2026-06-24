@@ -163,6 +163,54 @@ curl localhost:8000/github/status                      # {"mode":"live"}
 curl localhost:8000/github/repo/octocat/Hello-World    # real repo data
 ```
 
+## Approval-gated PR workflow (Phase 8.2)
+
+ForgeAI never silently writes to GitHub. The write path is a **two-phase,
+human-gated** flow (`GitHubWorkflow` + `ApprovalService`):
+
+```mermaid
+flowchart TD
+    P[propose] -->|opens approval request, NO writes| R{approved?}
+    R -->|no / pending| X[execute refused 403]
+    R -->|yes| E[execute: branch → commit → PR → URL]
+```
+
+- **`propose(repo, plan)`** — records what *will* happen and opens an approval
+  request. **Writes nothing** to GitHub.
+- A human **approves** or **rejects** (`ApprovalService.approve/reject`).
+- **`execute(repo, plan, request_id)`** — creates the branch, commit, and PR and
+  returns the PR URL — but **only if the request is approved**; otherwise it
+  raises (the API returns `403`).
+
+This is the safer governance story: an agent drafts a PR proposal, a human
+approves, *then* the PR is created. (ADR-0023)
+
+Discrete, composable manager operations back it:
+`create_branch()`, `create_commit()`, `create_pr()`, `get_review_status()`,
+`sync_repository()`.
+
+### API (demo flow)
+
+```bash
+# 1. Propose — returns an approval_id; writes nothing
+curl -s -X POST localhost:8000/github/pr/propose -H 'Content-Type: application/json' \
+  -d '{"owner":"you","name":"sandbox","task":"Add JWT auth",
+       "commit_message":"feat(auth): add JWT","files":{"auth.py":"import jwt"},
+       "pr_title":"feat(auth): JWT authentication"}'
+
+# 2. Executing now is refused (403) — not yet approved
+# 3. Approve, then execute → PR created with a URL
+curl -s -X POST localhost:8000/github/pr/<approval_id>/approve
+curl -s -X POST localhost:8000/github/pr/<approval_id>/execute -H 'Content-Type: application/json' -d '{...same body...}'
+```
+
+| Endpoint | Effect |
+|----------|--------|
+| `POST /github/pr/propose` | open approval request (no writes) |
+| `POST /github/pr/{id}/approve` | approve a proposal |
+| `POST /github/pr/{id}/reject` | reject a proposal |
+| `POST /github/pr/{id}/execute` | create the PR (403 unless approved) |
+
 ## Live validation
 
 Offline tests cover all logic via the fake provider. Real GitHub is validated
