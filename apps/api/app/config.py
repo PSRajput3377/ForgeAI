@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     jwt_secret: str = "change-me-in-production"
     jwt_algorithm: str = "HS256"
     jwt_expire_minutes: int = 1440
+    access_token_minutes: int = 15  # short-lived access token
+    refresh_token_days: int = 30  # long-lived refresh token
 
     # Model routing (Ollama, local)
     model_planner: str = "qwen3:8b"

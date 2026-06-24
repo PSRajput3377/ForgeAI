@@ -17,6 +17,7 @@ current implementation.
 | [rag-spec.md](rag-spec.md) | Chunking, embedding, indexing, retrieval |
 | [execution-spec.md](execution-spec.md) | Sandbox, security, error classification, retry loop |
 | [observability-spec.md](observability-spec.md) | Events, bus, store, metrics, tracing, approvals |
+| [auth-spec.md](auth-spec.md) | Authentication, RBAC, workspace isolation, invitations |
 | [state-spec.md](state-spec.md) | `ProjectState` field rules & invariants |
 | [api-contracts.md](api-contracts.md) | Request/response contracts per endpoint |
 | [prompt-spec.md](prompt-spec.md) | What a well-formed agent prompt must contain |

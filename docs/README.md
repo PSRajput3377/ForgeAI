@@ -18,6 +18,7 @@ Everything you need to understand ForgeAI **without reading the source code**.
 | Understand memory & RAG                | [memory.md](memory.md)            |
 | Understand code execution & sandboxing | [execution.md](execution.md)      |
 | Understand observability & the workspace | [observability.md](observability.md) |
+| Understand auth, teams & multi-tenancy | [auth.md](auth.md)                |
 | See the database schema                | [database.md](database.md)        |
 | Use the API                            | [api.md](api.md)                  |
 | Read the agent prompts                 | [prompts.md](prompts.md)          |

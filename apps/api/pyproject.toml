@@ -16,6 +16,12 @@ dependencies = [
     "loguru>=0.7",
     "httpx>=0.27",
     "langgraph>=0.2",
+    "python-jose[cryptography]>=3.3",
+    "argon2-cffi>=23.1",
+    "asyncpg>=0.30",
+    "aiosqlite>=0.20",
+    "pydantic[email]>=2.9",
+    "greenlet>=3.0",
 ]
 
 [dependency-groups]
@@ -36,6 +42,9 @@ target-version = "py312"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "C4"]
+# B008: FastAPI uses `Depends(...)`/`Security(...)` as argument defaults by
+# design — this check is a false positive for that idiom.
+ignore = ["B008"]
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

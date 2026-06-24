@@ -50,11 +50,12 @@ The project is being built in 12 phases. See the
 | 4     | Memory, RAG & Knowledge Engine | ✅ Complete  |
 | 5     | Autonomous Execution & Docker Sandbox | ✅ Complete |
 | 6     | Developer Workspace & Observability | ✅ Complete |
-| 7     | GitHub Integration           | ⬜ Not started |
-| 8     | Authentication               | ⬜ Not started |
-| 9     | Database                     | ⬜ Not started |
-| 10    | Dashboard                    | ⬜ Not started |
-| 11    | Deployment                   | ⬜ Not started |
+| 7     | Auth, Multi-User Workspaces & Teams | ✅ Complete |
+| 8     | GitHub Integration           | ⬜ Not started |
+| 9     | Dashboard                    | ⬜ Not started |
+| 10    | Deployment                   | ⬜ Not started |
+
+> Database work (ADR-0018) landed inside Phase 7, since auth/tenancy needs it.
 
 > Note: the phase order was revised in Phase 2 to front-load the AI engine
 > (the product's core). See `docs/decisions.md`.

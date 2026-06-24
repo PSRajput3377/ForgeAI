@@ -16,13 +16,21 @@ export default function Home() {
         </p>
       </div>
       <ApiStatus />
-      <a
-        href="/workspace"
-        className="rounded-md border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-900"
-      >
-        Open Workspace →
-      </a>
-      <p className="text-xs text-neutral-600">Phase 6 — Observability</p>
+      <div className="flex gap-3">
+        <a
+          href="/login"
+          className="rounded-md bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-500"
+        >
+          Sign in
+        </a>
+        <a
+          href="/workspace"
+          className="rounded-md border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-900"
+        >
+          Open Workspace →
+        </a>
+      </div>
+      <p className="text-xs text-neutral-600">Phase 7 — Auth & Teams</p>
     </main>
   );
 }

@@ -1,8 +1,37 @@
 # Database Design
 
-Initial PostgreSQL schema for the MVP. **Planned here; implemented with
-SQLAlchemy + Alembic in the Database phase** ([roadmap.md](roadmap.md)). This is
-enough for v1.0.
+PostgreSQL schema. The **auth & multi-tenancy tables are implemented** (Phase 7)
+as async SQLAlchemy models in `apps/api/app/db/models.py`; the original MVP
+entities below are the baseline they extend. Same models run on SQLite for
+tests (ADR-0018).
+
+## Multi-tenancy & auth (Phase 7, implemented)
+
+```
+users ──< memberships >── workspaces ──< projects
+organizations ──< workspaces
+workspaces ──< invitations
+workspaces ──< approvals / activity
+projects ──< comments
+```
+
+| Table | Key columns |
+|-------|-------------|
+| `users` | id, email (unique), name, password_hash (Argon2), avatar |
+| `organizations` | id, name, slug (unique), owner_id → users |
+| `workspaces` | id, organization_id → orgs, name |
+| `memberships` | user_id, workspace_id, role (owner/admin/member/viewer); unique(user, workspace) |
+| `projects` | id, workspace_id → workspaces, name, description |
+| `invitations` | id, workspace_id, email, role, token (unique), accepted, expires_at |
+| `approvals` | id, workspace_id, action, requested_by, approved_by, status |
+| `activity` | id, workspace_id, user_id, action, detail (audit + feed) |
+| `comments` | id, project_id, user_id, body |
+
+RBAC roles rank `owner > admin > member > viewer`. See [auth.md](auth.md).
+
+---
+
+## Original MVP entities (baseline)
 
 ## ER diagram
 
