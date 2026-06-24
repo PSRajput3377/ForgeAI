@@ -13,6 +13,8 @@ current implementation.
 |------|---------|
 | [agent-spec.md](agent-spec.md) | The contract every agent must satisfy |
 | [tool-spec.md](tool-spec.md) | The contract every tool must satisfy |
+| [memory-spec.md](memory-spec.md) | Memory scopes, manager, scoring, context |
+| [rag-spec.md](rag-spec.md) | Chunking, embedding, indexing, retrieval |
 | [state-spec.md](state-spec.md) | `ProjectState` field rules & invariants |
 | [api-contracts.md](api-contracts.md) | Request/response contracts per endpoint |
 | [prompt-spec.md](prompt-spec.md) | What a well-formed agent prompt must contain |

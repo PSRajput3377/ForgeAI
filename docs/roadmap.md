@@ -12,7 +12,7 @@ The canonical phase roadmap lives in
 | 2     | AI Engine & Agent Architecture | ✅ Complete    |
 | 2.5   | System Design & Documentation  | ✅ Complete    |
 | 3     | Tool System & Action Engine    | ✅ Complete    |
-| 4     | Memory + RAG                   | ⬜ Not started |
+| 4     | Memory, RAG & Knowledge Engine | ✅ Complete    |
 | 5     | Docker Sandbox                 | ⬜ Not started |
 | 6     | GitHub Integration             | ⬜ Not started |
 | 7     | Authentication                 | ⬜ Not started |

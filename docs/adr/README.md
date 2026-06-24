@@ -23,6 +23,7 @@ this folder is the formal record.
 | [0012](ADR-0012.md) | Diagrams as Mermaid, not PNG | Accepted | 2.5 |
 | [0013](ADR-0013.md) | Separate specs/ (what) from docs/ (how) | Accepted | 2.5 |
 | [0014](ADR-0014.md) | Capability System: request capabilities, not tools | Accepted | 3 |
+| [0015](ADR-0015.md) | Memory & RAG: pluggable backends, offline by default | Accepted | 4 |
 
 ## Template
 

@@ -15,6 +15,7 @@ Everything you need to understand ForgeAI **without reading the source code**.
 | See how a request flows end-to-end     | [workflows.md](workflows.md)      |
 | Understand the shared state            | [state.md](state.md)              |
 | Know the tool interfaces               | [tools.md](tools.md)              |
+| Understand memory & RAG                | [memory.md](memory.md)            |
 | See the database schema                | [database.md](database.md)        |
 | Use the API                            | [api.md](api.md)                  |
 | Read the agent prompts                 | [prompts.md](prompts.md)          |

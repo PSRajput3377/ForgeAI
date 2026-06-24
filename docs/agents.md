@@ -153,7 +153,11 @@ shared state. Formal acceptance criteria live in
 - **Purpose:** surface short-term (task/files/errors) and long-term (style, past
   decisions, frameworks) context.
 - **Inputs:** `user_request`, `project_id`. **Outputs:** `project_context`.
-- **Future:** PostgreSQL (long-term) + Qdrant (semantic recall) in the RAG phase.
+- **Implementation:** when given a `ContextBuilder` (Phase 4), it assembles
+  scored memories (session/project/user) + semantic RAG hits and writes them
+  into `state.project_context`; otherwise it falls back to lightweight behavior.
+  See [memory.md](memory.md). PostgreSQL-backed durable memory lands in the
+  Database phase behind the same interface.
 
 ### Coder
 - **Purpose:** write code from task + context. **Never guesses; never executes
