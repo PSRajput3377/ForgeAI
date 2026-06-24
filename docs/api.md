@@ -11,10 +11,25 @@ Interactive docs are always available when the API is running:
 
 ## Current endpoints
 
-| Method | Path      | Description                         |
-|--------|-----------|-------------------------------------|
-| GET    | `/`       | Service banner (name + version)     |
-| GET    | `/health` | Liveness probe                      |
+| Method | Path          | Description                                      |
+|--------|---------------|--------------------------------------------------|
+| GET    | `/`           | Service banner (name + version)                  |
+| GET    | `/health`     | Liveness probe                                   |
+| POST   | `/agents/run` | Run the full multi-agent workflow for a request  |
+
+### `POST /agents/run`
+
+```jsonc
+// request
+{ "user_request": "Add JWT authentication", "project_path": "/work/myproj" }
+
+// response
+{ "final_response": "...", "review_verdict": "approved",
+  "tasks": 6, "files_changed": ["generated/output.txt"], "retries": 0 }
+```
+
+> Requires Ollama running with models pulled (`make pull-models`). The offline
+> path is covered by the test suite via `EchoProvider`.
 
 ## Conventions (for endpoints added later)
 

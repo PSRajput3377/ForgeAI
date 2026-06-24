@@ -42,18 +42,20 @@ The project is being built in 12 phases. See the
 
 | Phase | Name                  | Status         |
 |-------|-----------------------|----------------|
-| 0     | Product Design        | ✅ Complete    |
-| 1     | Project Setup         | ✅ Complete    |
-| 2     | Authentication        | ⬜ Not started |
-| 3     | Database              | ⬜ Not started |
-| 4     | Agent Architecture    | ⬜ Not started |
-| 5     | Tool System           | ⬜ Not started |
-| 6     | Memory + RAG          | ⬜ Not started |
-| 7     | Multi-Agent Workflow  | ⬜ Not started |
-| 8     | Docker Sandbox        | ⬜ Not started |
-| 9     | GitHub Integration    | ⬜ Not started |
-| 10    | Dashboard             | ⬜ Not started |
-| 11    | Deployment            | ⬜ Not started |
+| 0     | Product Design               | ✅ Complete    |
+| 1     | Project Setup                | ✅ Complete    |
+| 2     | AI Engine & Agent Architecture | ✅ Complete  |
+| 3     | Tool System                  | ⬜ Not started |
+| 4     | Memory + RAG                 | ⬜ Not started |
+| 5     | Docker Sandbox               | ⬜ Not started |
+| 6     | GitHub Integration           | ⬜ Not started |
+| 7     | Authentication               | ⬜ Not started |
+| 8     | Database                     | ⬜ Not started |
+| 9     | Dashboard                    | ⬜ Not started |
+| 10    | Deployment                   | ⬜ Not started |
+
+> Note: the phase order was revised in Phase 2 to front-load the AI engine
+> (the product's core). See `docs/DECISIONS.md`.
 
 ## Documentation
 

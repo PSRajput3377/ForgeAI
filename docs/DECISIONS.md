@@ -106,3 +106,54 @@ running `create-next-app` / generators.
 **Why:** Deterministic, fully version-controlled layout with no interactive
 prompts; dependencies resolve at install/build time. Verified working: backend
 tests + lint pass, frontend type-checks and builds.
+
+---
+
+## ADR-0009 — Agent system lives in `packages/`, imported by the API
+
+**Phase:** 2 · **Status:** Accepted
+
+**Decision:** The AI engine (`core`, `models`, `prompts`, `tools`, `agents`)
+lives in repo-root `packages/`, not inside `apps/api`. The API depends on it
+via `PYTHONPATH`/pytest `pythonpath`.
+
+**Why:** Keeps orchestration reusable and independently testable, and matches
+the Phase 1 monorepo layout. The API is one consumer of the engine, not its
+owner.
+
+---
+
+## ADR-0010 — LangGraph over one shared `ProjectState`
+
+**Phase:** 2 · **Status:** Accepted
+
+**Decision:** Orchestrate agents with an explicit LangGraph `StateGraph` over a
+single `ProjectState`, with a conditional edge after review that drives a
+bounded `reflection → coder` retry loop. No agent calls another directly.
+
+**Why:** Makes execution order, branching, and retries explicit and
+inspectable; enforces loose coupling (agents only touch shared state); supports
+self-correction. Ad-hoc async loops were rejected as unobservable.
+
+---
+
+## ADR-0011 — EchoProvider for offline, deterministic testing
+
+**Phase:** 2 · **Status:** Accepted
+
+**Decision:** Ship an `EchoProvider` implementing the `LLMProvider` interface
+that returns canned responses with no network calls. The full workflow test
+suite runs against it.
+
+**Why:** The whole agent graph must be testable in CI without a live Ollama
+server or the ~20 GB of pulled models. Provider independence (ADR-0003) makes
+this a drop-in.
+
+---
+
+## Note — roadmap reordering
+
+The original Phase 0 roadmap placed Authentication at Phase 2 and split agent
+work across Phases 4/5/7. We front-loaded the **AI engine** as Phase 2 because
+it is the heart of the product. The remaining phases shift accordingly; the
+phase *table* in the roadmap reflects the new order.
