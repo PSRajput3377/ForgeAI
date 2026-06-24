@@ -45,7 +45,7 @@ api-install: ## Install backend deps locally with uv
 
 .PHONY: api-dev
 api-dev: ## Run the API locally with autoreload
-	cd apps/api && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
+	cd apps/api && PYTHONPATH="$(CURDIR)/apps/api:$(CURDIR)/packages" uv run uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
 
 .PHONY: api-fmt
 api-fmt: ## Format & lint backend (black + ruff)

@@ -33,6 +33,7 @@ this folder is the formal record.
 | [0022](ADR-0022.md) | Queue-based execution + reliability primitives behind interfaces | Accepted | 10 |
 | [0023](ADR-0023.md) | GitHub writes are human-gated (propose → approve → execute) | Accepted | 8.2 |
 | [0024](ADR-0024.md) | Persist PR approvals in PostgreSQL | Accepted | 11 |
+| [0025](ADR-0025.md) | Evaluation substrate: versioned rubric over an append-only record | Accepted | 12.1 |
 
 ## Template
 

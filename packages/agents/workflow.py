@@ -152,9 +152,15 @@ async def run_workflow(
     bus=None,
     github_workflow=None,
     github_repo=None,
+    evaluation_store=None,
     **state_kwargs,
 ) -> ProjectState:
-    """Run the full workflow for a request and return the final ProjectState."""
+    """Run the full workflow for a request and return the final ProjectState.
+
+    If ``evaluation_store`` is provided (Phase 12.1), the finished run is scored
+    by the ``EvaluationEngine`` and the record appended to the store. Off by
+    default, so the offline path is unchanged.
+    """
     app = build_workflow(
         router,
         context_builder=context_builder,
@@ -164,6 +170,8 @@ async def run_workflow(
         github_repo=github_repo,
     )
     initial = ProjectState(user_request=user_request, **state_kwargs)
+    loop = asyncio.get_event_loop()
+    started = loop.time()
     if bus is not None:
         from observability.events import EventType
 
@@ -181,5 +189,11 @@ async def run_workflow(
             EventType.RUN_COMPLETED,
             run_id=final.project_id,
             payload={"success": final.review_verdict.value == "approved"},
+        )
+    if evaluation_store is not None:
+        from evaluation import EvaluationEngine
+
+        evaluation_store.add(
+            EvaluationEngine().evaluate(final, execution_time_s=loop.time() - started)
         )
     return final
