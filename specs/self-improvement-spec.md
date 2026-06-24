@@ -221,7 +221,7 @@ action (§8), never automatic.
 - [x] Prompts are versioned and addressable; `system_prompt(role)` is unchanged
       for callers; each run records the versions it used.
 - [x] Reflection stores failures and reuses a matching past fix on recurrence.
-- [ ] A versioned benchmark suite + harness runs offline (echo) and on real models.
+- [x] A versioned benchmark suite + harness runs offline (echo) and on real models.
 - [ ] Multi-agent debate runs behind a config flag, off by default, deterministic
       under `EchoModel`.
 - [ ] Rule-based dynamic agent selection works and is recorded with rationale.

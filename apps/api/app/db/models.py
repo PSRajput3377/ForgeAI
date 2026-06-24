@@ -243,3 +243,19 @@ class FailureRecord(Base, TimestampMixin):
     fix: Mapped[str] = mapped_column(Text, default="")
     outcome: Mapped[str] = mapped_column(String(16), default="unknown")
     hits: Mapped[int] = mapped_column(Integer, default=1)
+
+
+class BenchmarkRun(Base, TimestampMixin):
+    """A persisted benchmark report (Phase 12.5 — the ``benchmark_results``
+    table). One row per suite run, tagged with the ForgeAI + suite version so
+    successive versions are comparable (spec §5). The full report (per-scenario
+    results + stats) is stored as JSON; ``pass_rate`` is denormalized for
+    cheap trend queries."""
+
+    __tablename__ = "benchmark_results"
+
+    id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
+    forge_version: Mapped[str] = mapped_column(String(64), index=True)
+    suite_version: Mapped[str] = mapped_column(String(16))
+    pass_rate: Mapped[float] = mapped_column(Float)
+    report: Mapped[dict] = mapped_column(JSON)  # serialized BenchmarkReport
