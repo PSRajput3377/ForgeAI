@@ -189,6 +189,14 @@ Discrete, composable manager operations back it:
 `create_branch()`, `create_commit()`, `create_pr()`, `get_review_status()`,
 `sync_repository()`.
 
+### Wired into the agent pipeline
+
+The **Git agent** uses this workflow: after a run, `build_workflow(...,
+github_workflow=, github_repo=)` makes the Git agent call `propose()` with a
+`PRPlan` built from the generated code. The run ends with a **pending approval**
+(`state.pr_approval_id`) and **no PR written** — a human approves, then executes.
+So the autonomous pipeline drafts the PR; the human gate stays in force.
+
 ### API (demo flow)
 
 ```bash

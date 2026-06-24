@@ -194,9 +194,14 @@ shared state. Formal acceptance criteria live in
   `test_passed`; routes back to Coder. Bounded by `max_retries`.
 
 ### Git
-- **Purpose:** stage, commit, (later) open PRs.
-- **Inputs:** `generated_code`, `user_request`. **Outputs:** commit message.
-- **Future:** real git ops + PR creation via the Git tool.
+- **Purpose:** draft a commit message and, when wired, **propose a gated PR**.
+- **Inputs:** `generated_code`, `user_request`, `test_passed`.
+- **Outputs:** commit message; and when a `GitHubWorkflow` + repo are wired
+  (`build_workflow(..., github_workflow=, github_repo=)`), it calls
+  `workflow.propose()` — building a `PRPlan` from the generated code — and sets
+  `state.pr_approval_id` / `pr_branch` / `pr_title`. This **writes nothing**: a
+  human approves the request, then the PR is executed via the API. The agent
+  never auto-creates a PR (ADR-0023). See [github.md](github.md).
 
 ## Status
 

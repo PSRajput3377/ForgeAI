@@ -77,7 +77,12 @@ def _instrument(node_name: str, fn, bus):
 
 
 def build_workflow(
-    router: ModelRouter, context_builder=None, engine_factory=None, bus=None
+    router: ModelRouter,
+    context_builder=None,
+    engine_factory=None,
+    bus=None,
+    github_workflow=None,
+    github_repo=None,
 ):
     """Compile and return the agent workflow graph for a given ModelRouter.
 
@@ -90,6 +95,10 @@ def build_workflow(
 
     If ``bus`` is provided (Phase 6), each node emits lifecycle events for the
     timeline, metrics, and live WebSocket updates.
+
+    If ``github_workflow`` + ``github_repo`` are provided (Phase 8.2), the Git
+    agent proposes a gated PR (opens an approval request, writes nothing);
+    otherwise it only drafts a commit message.
     """
     manager = ManagerAgent(router)
     planner = PlannerAgent(router)
@@ -100,7 +109,7 @@ def build_workflow(
     testing = TestingAgent(router)
     review = ReviewAgent(router)
     reflection = ReflectionAgent(router)
-    git = GitAgent(router)
+    git = GitAgent(router, workflow=github_workflow, repo=github_repo)
 
     graph = StateGraph(ProjectState)
 
@@ -145,11 +154,18 @@ async def run_workflow(
     context_builder=None,
     engine_factory=None,
     bus=None,
+    github_workflow=None,
+    github_repo=None,
     **state_kwargs,
 ) -> ProjectState:
     """Run the full workflow for a request and return the final ProjectState."""
     app = build_workflow(
-        router, context_builder=context_builder, engine_factory=engine_factory, bus=bus
+        router,
+        context_builder=context_builder,
+        engine_factory=engine_factory,
+        bus=bus,
+        github_workflow=github_workflow,
+        github_repo=github_repo,
     )
     initial = ProjectState(user_request=user_request, **state_kwargs)
     if bus is not None:

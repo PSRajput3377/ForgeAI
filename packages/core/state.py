@@ -54,6 +54,12 @@ class ProjectState(BaseModel):
     max_retries: int = 2
     needs_reflection: bool = False
 
+    # --- GitHub PR proposal (gated; set by the Git agent, executed after approval) ---
+    pr_branch: str | None = None
+    pr_title: str | None = None
+    pr_approval_id: str | None = None  # the human must approve this before any write
+    pr_url: str | None = None  # set only once an approved proposal is executed
+
     # --- audit trail ---
     messages: list[AgentMessage] = Field(default_factory=list)
 
