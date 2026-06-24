@@ -14,11 +14,12 @@ The canonical phase roadmap lives in
 | 3     | Tool System & Action Engine    | ✅ Complete    |
 | 4     | Memory, RAG & Knowledge Engine | ✅ Complete    |
 | 5     | Autonomous Execution & Docker Sandbox | ✅ Complete |
-| 6     | GitHub Integration             | ⬜ Not started |
-| 7     | Authentication                 | ⬜ Not started |
-| 8     | Database                       | ⬜ Not started |
-| 9     | Dashboard                      | ⬜ Not started |
-| 10    | Deployment                     | ⬜ Not started |
+| 6     | Developer Workspace & Observability | ✅ Complete |
+| 7     | GitHub Integration             | ⬜ Not started |
+| 8     | Authentication                 | ⬜ Not started |
+| 9     | Database                       | ⬜ Not started |
+| 10    | Dashboard                      | ⬜ Not started |
+| 11    | Deployment                     | ⬜ Not started |
 
 > The original roadmap placed Authentication/Database earlier and split the
 > agent work across later phases. Phase 2 front-loaded the AI engine (the core

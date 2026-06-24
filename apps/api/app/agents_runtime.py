@@ -40,5 +40,13 @@ def build_router() -> ModelRouter:
 
 
 async def run_request(user_request: str, **kwargs) -> ProjectState:
-    """Run the agent workflow for a user request using the production router."""
-    return await run_workflow(build_router(), user_request, **kwargs)
+    """Run the agent workflow for a user request using the production router.
+
+    Publishes lifecycle events to the process-wide observability bus so the
+    timeline, metrics, and live WebSocket reflect the run.
+    """
+    from app.observability_runtime import observability
+
+    return await run_workflow(
+        build_router(), user_request, bus=observability.bus, **kwargs
+    )

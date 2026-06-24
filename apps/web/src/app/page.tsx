@@ -16,7 +16,13 @@ export default function Home() {
         </p>
       </div>
       <ApiStatus />
-      <p className="text-xs text-neutral-600">Phase 1 — Foundation</p>
+      <a
+        href="/workspace"
+        className="rounded-md border border-neutral-700 px-4 py-2 text-sm text-neutral-200 hover:bg-neutral-900"
+      >
+        Open Workspace →
+      </a>
+      <p className="text-xs text-neutral-600">Phase 6 — Observability</p>
     </main>
   );
 }

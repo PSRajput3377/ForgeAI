@@ -49,11 +49,12 @@ The project is being built in 12 phases. See the
 | 3     | Tool System & Action Engine  | ✅ Complete    |
 | 4     | Memory, RAG & Knowledge Engine | ✅ Complete  |
 | 5     | Autonomous Execution & Docker Sandbox | ✅ Complete |
-| 6     | GitHub Integration           | ⬜ Not started |
-| 7     | Authentication               | ⬜ Not started |
-| 8     | Database                     | ⬜ Not started |
-| 9     | Dashboard                    | ⬜ Not started |
-| 10    | Deployment                   | ⬜ Not started |
+| 6     | Developer Workspace & Observability | ✅ Complete |
+| 7     | GitHub Integration           | ⬜ Not started |
+| 8     | Authentication               | ⬜ Not started |
+| 9     | Database                     | ⬜ Not started |
+| 10    | Dashboard                    | ⬜ Not started |
+| 11    | Deployment                   | ⬜ Not started |
 
 > Note: the phase order was revised in Phase 2 to front-load the AI engine
 > (the product's core). See `docs/decisions.md`.

@@ -14,6 +14,8 @@ agents loosely coupled (ADR-0001).
 
 from __future__ import annotations
 
+import asyncio
+
 from core.state import ProjectState, ReviewVerdict
 from langgraph.graph import END, START, StateGraph
 from models.router import ModelRouter
@@ -39,7 +41,44 @@ def _after_review(state: ProjectState) -> str:
     return "git"  # give up gracefully; Manager reports the non-approval
 
 
-def build_workflow(router: ModelRouter, context_builder=None, engine_factory=None):
+def _instrument(node_name: str, fn, bus):
+    """Wrap an agent node so it emits agent.started/completed/failed events.
+
+    No-op wrapper when ``bus`` is None, so the offline default workflow is
+    unchanged. Timing is measured per node for the metrics dashboard.
+    """
+    if bus is None:
+        return fn
+
+    from observability.events import EventType
+
+    async def wrapped(state):
+        loop = asyncio.get_event_loop()
+        start = loop.time()
+        await bus.emit(
+            EventType.AGENT_STARTED, agent=node_name, run_id=state.project_id
+        )
+        try:
+            result = await fn(state)
+        except Exception:
+            await bus.emit(
+                EventType.AGENT_FAILED, agent=node_name, run_id=state.project_id
+            )
+            raise
+        await bus.emit(
+            EventType.AGENT_COMPLETED,
+            agent=node_name,
+            run_id=state.project_id,
+            payload={"duration": loop.time() - start},
+        )
+        return result
+
+    return wrapped
+
+
+def build_workflow(
+    router: ModelRouter, context_builder=None, engine_factory=None, bus=None
+):
     """Compile and return the agent workflow graph for a given ModelRouter.
 
     If ``context_builder`` is provided (Phase 4 Memory + RAG), the Memory agent
@@ -48,6 +87,9 @@ def build_workflow(router: ModelRouter, context_builder=None, engine_factory=Non
 
     If ``engine_factory`` is provided (Phase 5), the Execution agent runs the
     real build/test loop in a sandbox; otherwise it simulates execution.
+
+    If ``bus`` is provided (Phase 6), each node emits lifecycle events for the
+    timeline, metrics, and live WebSocket updates.
     """
     manager = ManagerAgent(router)
     planner = PlannerAgent(router)
@@ -64,17 +106,17 @@ def build_workflow(router: ModelRouter, context_builder=None, engine_factory=Non
 
     # One node per step. ``intake`` and ``final`` are the Manager's two touch
     # points (it delegates everything in between).
-    graph.add_node("intake", manager.intake)
-    graph.add_node("planner", planner.run)
-    graph.add_node("research", researcher.run)
-    graph.add_node("memory", memory.run)
-    graph.add_node("coder", coder.run)
-    graph.add_node("execute", execution.run)
-    graph.add_node("tests", testing.run)
-    graph.add_node("review", review.run)
-    graph.add_node("reflection", reflection.run)
-    graph.add_node("git", git.run)
-    graph.add_node("final", manager.run)
+    graph.add_node("intake", _instrument("intake", manager.intake, bus))
+    graph.add_node("planner", _instrument("planner", planner.run, bus))
+    graph.add_node("research", _instrument("research", researcher.run, bus))
+    graph.add_node("memory", _instrument("memory", memory.run, bus))
+    graph.add_node("coder", _instrument("coder", coder.run, bus))
+    graph.add_node("execute", _instrument("execute", execution.run, bus))
+    graph.add_node("tests", _instrument("tests", testing.run, bus))
+    graph.add_node("review", _instrument("review", review.run, bus))
+    graph.add_node("reflection", _instrument("reflection", reflection.run, bus))
+    graph.add_node("git", _instrument("git", git.run, bus))
+    graph.add_node("final", _instrument("final", manager.run, bus))
 
     graph.add_edge(START, "intake")
     graph.add_edge("intake", "planner")
@@ -97,11 +139,35 @@ def build_workflow(router: ModelRouter, context_builder=None, engine_factory=Non
 
 
 async def run_workflow(
-    router: ModelRouter, user_request: str, **state_kwargs
+    router: ModelRouter,
+    user_request: str,
+    *,
+    context_builder=None,
+    engine_factory=None,
+    bus=None,
+    **state_kwargs,
 ) -> ProjectState:
     """Run the full workflow for a request and return the final ProjectState."""
-    app = build_workflow(router)
+    app = build_workflow(
+        router, context_builder=context_builder, engine_factory=engine_factory, bus=bus
+    )
     initial = ProjectState(user_request=user_request, **state_kwargs)
+    if bus is not None:
+        from observability.events import EventType
+
+        await bus.emit(
+            EventType.RUN_STARTED,
+            run_id=initial.project_id,
+            payload={"request": user_request},
+        )
     result = await app.ainvoke(initial)
-    # LangGraph returns the state as a dict-like; normalize back to ProjectState.
-    return ProjectState.model_validate(result)
+    final = ProjectState.model_validate(result)
+    if bus is not None:
+        from observability.events import EventType
+
+        await bus.emit(
+            EventType.RUN_COMPLETED,
+            run_id=final.project_id,
+            payload={"success": final.review_verdict.value == "approved"},
+        )
+    return final
