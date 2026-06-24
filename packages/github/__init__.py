@@ -23,6 +23,7 @@ from github.models import (
     ReviewComment,
 )
 from github.provider import FakeGitHubProvider, GitHubProvider
+from github.rest_provider import RestGitHubProvider
 from github.rest_support import (
     paginate,
     parse_next_link,
@@ -58,6 +59,7 @@ __all__ = [
     "PullRequest",
     "PullRequestService",
     "Repository",
+    "RestGitHubProvider",
     "Review",
     "ReviewComment",
     "WorkflowResult",

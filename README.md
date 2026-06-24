@@ -200,8 +200,16 @@ safety rules are verified against the fake provider. Commits are authored on a
 **local clone via git** (not the REST API), which composes with the Docker
 sandbox, testing, reflection, review, and CI.
 
-Live GitHub functionality requires a valid `GITHUB_TOKEN` and is validated
-separately against **sandbox repositories** via
+**Going live is just config** — set `GITHUB_TOKEN` and the platform switches to
+the real provider automatically (no code change):
+
+```bash
+# add a fine-grained PAT (repo scope) to .env, then:
+curl localhost:8000/github/status                    # {"mode":"live"}
+curl localhost:8000/github/repo/octocat/Hello-World  # real repo data
+```
+
+Live functionality should be validated against **sandbox repositories** via
 [`scripts/verify-github.sh`](scripts/verify-github.sh) — never production repos.
 
 ## Tech stack (at a glance)

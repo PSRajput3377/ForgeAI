@@ -12,6 +12,7 @@ from loguru import logger
 
 from app.api.agents import router as agents_router
 from app.api.auth import router as auth_router
+from app.api.github import router as github_router
 from app.api.health import router as health_router
 from app.api.observability import router as observability_router
 from app.api.organizations import router as organizations_router
@@ -53,6 +54,7 @@ app.include_router(agents_router)
 app.include_router(observability_router)
 app.include_router(auth_router)
 app.include_router(organizations_router)
+app.include_router(github_router)
 
 
 @app.get("/")

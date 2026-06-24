@@ -136,6 +136,33 @@ built and unit-tested with a mock transport:
 `repositories`, `branches`, `commits`, `pull_requests`, `reviews`, `ci_runs` —
 persisted via the Phase 7 async DB layer.
 
+## Going live (real GitHub)
+
+The provider is selected automatically from configuration — no code change:
+
+```
+GITHUB_TOKEN set  → RestGitHubProvider (real GitHub)
+GITHUB_TOKEN empty → FakeGitHubProvider (offline, default)
+```
+
+`apps/api/app/github_runtime.py` is the seam (`build_provider()` /
+`build_manager()`); agents and workflows are untouched. Live read endpoints to
+demo it:
+
+| Endpoint | Shows |
+|----------|-------|
+| `GET /github/status` | `{"mode":"live"}` or `{"mode":"fake"}` |
+| `GET /github/repo/{owner}/{name}` | repo info |
+| `GET /github/repo/{owner}/{name}/branches` | branches |
+| `GET /github/repo/{owner}/{name}/issues` | open issues (Issue→task source) |
+| `GET /github/repo/{owner}/{name}/pulls/{n}` | a pull request |
+
+```bash
+# Flip to live: add a fine-grained PAT (repo scope) to .env, restart, then:
+curl localhost:8000/github/status                      # {"mode":"live"}
+curl localhost:8000/github/repo/octocat/Hello-World    # real repo data
+```
+
 ## Live validation
 
 Offline tests cover all logic via the fake provider. Real GitHub is validated

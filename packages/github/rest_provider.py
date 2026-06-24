@@ -21,6 +21,7 @@ from github.models import (
     Repository,
     Review,
 )
+from github.provider import GitHubProvider
 
 _CI_MAP = {
     "success": CIStatus.SUCCESS,
@@ -30,7 +31,7 @@ _CI_MAP = {
 }
 
 
-class RestGitHubProvider:
+class RestGitHubProvider(GitHubProvider):
     """GitHub REST v3 client. Implements the GitHubProvider interface."""
 
     def __init__(self, token: str, api_url: str = "https://api.github.com"):
