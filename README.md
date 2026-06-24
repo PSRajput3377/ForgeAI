@@ -33,6 +33,120 @@ code, test, and review — in real time — inside a sandboxed project.
 - **Students** — "Build my assignment."
 - **Companies** — "Build an internal dashboard."
 
+## Getting started
+
+### Prerequisites
+
+- **Docker** + **Docker Compose** (for the local service stack)
+- **Node.js** 20+ (for the frontend)
+- **[uv](https://github.com/astral-sh/uv)** (for the Python backend)
+- ~20 GB free disk (for the local Ollama models)
+
+### 1. Clone and configure
+
+```bash
+git clone https://github.com/PSRajput3377/ForgeAI.git
+cd ForgeAI
+make env          # creates .env from .env.example (safe local defaults)
+```
+
+The defaults work out of the box — no API keys needed (everything runs locally
+on Ollama). Change `JWT_SECRET` before any non-local use, and add `GITHUB_TOKEN`
+only if you want live GitHub features.
+
+### 2. Start the stack
+
+```bash
+make up            # postgres, redis, qdrant, ollama, forge-api
+make pull-models   # one-time ~20 GB model download (qwen3, deepseek-coder, …)
+```
+
+Check it's healthy:
+
+```bash
+make ps
+curl http://localhost:8000/health        # {"status":"ok",...}
+```
+
+| Service   | URL                              |
+|-----------|----------------------------------|
+| API       | http://localhost:8000            |
+| API docs  | http://localhost:8000/docs       |
+| Readiness | http://localhost:8000/health/ready |
+| Metrics   | http://localhost:8000/metrics    |
+| Qdrant    | http://localhost:6333/dashboard  |
+
+### 3. Run the frontend
+
+```bash
+make web-install
+make web-dev       # http://localhost:3000
+```
+
+Open **http://localhost:3000**, click **Sign in** to create an account, then
+open the **Workspace** to watch agents work live.
+
+### 4. Use it
+
+**Via the UI:** sign in → open the Workspace → type a task ("Add JWT
+authentication"). The agent timeline, status, and metrics update in real time
+over a WebSocket.
+
+**Via the API** (everything the UI does is an endpoint — see `/docs`):
+
+```bash
+# 1. Register + log in to get a token
+curl -s -X POST localhost:8000/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"you@example.com","name":"You","password":"changeme123"}'
+
+TOKEN=$(curl -s -X POST localhost:8000/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"you@example.com","password":"changeme123"}' | python3 -c 'import sys,json;print(json.load(sys.stdin)["access_token"])')
+
+# 2. Run the multi-agent workflow on a task
+curl -s -X POST localhost:8000/agents/run \
+  -H 'Content-Type: application/json' \
+  -d '{"user_request":"Add JWT authentication"}' | python3 -m json.tool
+
+# 3. Watch a run's event timeline
+curl -s localhost:8000/observability/timeline/<run_id> | python3 -m json.tool
+```
+
+> Note: a real agent run needs the Ollama models pulled (`make pull-models`).
+> Without them the workflow still runs end-to-end in tests via an offline
+> provider — see [Development](#development).
+
+### Common commands
+
+Run `make help` for the full list. Highlights:
+
+| Command            | What it does                              |
+|--------------------|-------------------------------------------|
+| `make up` / `down` | start / stop all services                 |
+| `make logs`        | tail logs for all services                |
+| `make pull-models` | download the Ollama models (once)         |
+| `make api-dev`     | run the API on the host with autoreload   |
+| `make web-dev`     | run the Next.js dev server                |
+| `make clean`       | stop services and **delete all data**     |
+
+Full setup details: [`docs/setup.md`](docs/setup.md).
+
+## Development
+
+The backend runs and is fully tested **offline** — no Docker, no models, no
+external services required (every external dependency has a deterministic
+in-memory fake):
+
+```bash
+cd apps/api
+uv sync
+uv run pytest -q                          # run the test suite
+uv run ruff check . && uv run black --check .   # lint + format
+```
+
+The frontend builds with `cd apps/web && npm install && npm run build`.
+
 ## Status
 
 🚧 **Pre-alpha — in active development.**
