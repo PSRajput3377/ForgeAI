@@ -224,7 +224,7 @@ action (§8), never automatic.
 - [x] A versioned benchmark suite + harness runs offline (echo) and on real models.
 - [x] Multi-agent debate runs behind a config flag, off by default, deterministic
       under `EchoModel`.
-- [ ] Rule-based dynamic agent selection works and is recorded with rationale.
+- [x] Rule-based dynamic agent selection works and is recorded with rationale.
 - [ ] The Agent Analytics tab renders per-agent deltas and prompt comparison.
 - [ ] Offline suite green; ruff + black clean; docs updated; an ADR records the
       measurement-substrate design.

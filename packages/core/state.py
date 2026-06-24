@@ -34,6 +34,10 @@ class ProjectState(BaseModel):
     project_id: str | None = None
     project_path: str | None = None
 
+    # --- dynamic agent selection (Phase 12.7) ---
+    task_type: str | None = None  # classified kind: backend/frontend/database/general
+    selection_rationale: str = ""  # why this task type / routing was chosen (auditable)
+
     # --- planning ---
     tasks: list[TaskSpec] = Field(default_factory=list)
     current_task: TaskSpec | None = None

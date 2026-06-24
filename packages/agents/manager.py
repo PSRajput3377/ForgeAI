@@ -11,6 +11,7 @@ from __future__ import annotations
 from core.messages import AgentMessage, MessageStatus
 from core.roles import AgentRole
 from core.state import ProjectState, ReviewVerdict
+from models.router import ModelRouter
 
 from agents.base import BaseAgent
 
@@ -18,14 +19,31 @@ from agents.base import BaseAgent
 class ManagerAgent(BaseAgent):
     role = AgentRole.MANAGER
 
+    def __init__(self, router: ModelRouter, *, selection_strategy=None):
+        super().__init__(router)
+        self.selection_strategy = selection_strategy
+
     async def intake(self, state: ProjectState) -> ProjectState:
-        """Acknowledge and record the incoming request at the start of a run."""
+        """Acknowledge and record the incoming request at the start of a run.
+
+        When a selection strategy is configured (Phase 12.7), classify the task
+        type and record the rationale onto state so downstream routing and the
+        analytics can use it. Off by default — state.task_type stays None.
+        """
+        if self.selection_strategy is not None:
+            selection = self.selection_strategy.select(state)
+            state.task_type = selection.task_type.value
+            state.selection_rationale = selection.rationale
+
+        summary = f"Received request: {state.user_request[:80]}"
+        if state.task_type:
+            summary += f" [type={state.task_type}]"
         state.record(
             AgentMessage(
                 task_id="intake",
                 sender=self.role,
                 status=MessageStatus.IN_PROGRESS,
-                summary=f"Received request: {state.user_request[:80]}",
+                summary=summary,
             )
         )
         return state

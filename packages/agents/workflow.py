@@ -81,6 +81,7 @@ def build_workflow(
     github_repo=None,
     failure_store=None,
     debate_planner=0,
+    selection_strategy=None,
 ):
     """Compile and return the agent workflow graph for a given ModelRouter.
 
@@ -105,8 +106,12 @@ def build_workflow(
     If ``debate_planner >= 2`` (Phase 12.6), the Planner node runs a multi-agent
     debate (N independent attempts, judged) instead of a single pass; the
     default (0) leaves the graph unchanged.
+
+    If ``selection_strategy`` is provided (Phase 12.7), the Manager classifies
+    the task type at intake and records the rationale; otherwise task_type stays
+    None and routing is unchanged.
     """
-    manager = ManagerAgent(router)
+    manager = ManagerAgent(router, selection_strategy=selection_strategy)
     if debate_planner >= 2:
         from agents.debate import DebatingPlannerAgent
 
@@ -170,6 +175,7 @@ async def run_workflow(
     evaluation_store=None,
     failure_store=None,
     debate_planner=0,
+    selection_strategy=None,
     **state_kwargs,
 ) -> ProjectState:
     """Run the full workflow for a request and return the final ProjectState.
@@ -177,8 +183,9 @@ async def run_workflow(
     If ``evaluation_store`` is provided (Phase 12.1), the finished run is scored
     by the ``EvaluationEngine`` and the record appended to the store. If
     ``failure_store`` is provided (Phase 12.4), Reflection reuses known fixes.
-    If ``debate_planner >= 2`` (Phase 12.6), the Planner debates the plan. All
-    off by default, so the offline path is unchanged.
+    If ``debate_planner >= 2`` (Phase 12.6), the Planner debates the plan. If
+    ``selection_strategy`` is provided (Phase 12.7), the task type is classified
+    at intake. All off by default, so the offline path is unchanged.
     """
     app = build_workflow(
         router,
@@ -189,6 +196,7 @@ async def run_workflow(
         github_repo=github_repo,
         failure_store=failure_store,
         debate_planner=debate_planner,
+        selection_strategy=selection_strategy,
     )
     initial = ProjectState(user_request=user_request, **state_kwargs)
     loop = asyncio.get_event_loop()
