@@ -13,6 +13,7 @@ import { AgentStatus } from "@/components/AgentStatus";
 import { AgentTimeline } from "@/components/AgentTimeline";
 import { ApprovalCenter } from "@/components/ApprovalCenter";
 import { MetricsPanel } from "@/components/MetricsPanel";
+import { TaskInput } from "@/components/TaskInput";
 
 export default function WorkspacePage() {
   const { events, status } = useEventStream();
@@ -31,10 +32,17 @@ export default function WorkspacePage() {
         </span>
       </header>
 
-      {/* Centerpiece: PR Approval Center */}
-      <Panel title="Pending Approvals">
-        <ApprovalCenter />
+      {/* Entry point: describe a task and run the agent team */}
+      <Panel title="New Task">
+        <TaskInput />
       </Panel>
+
+      {/* PR Approval Center */}
+      <div className="mt-6">
+        <Panel title="Pending Approvals">
+          <ApprovalCenter />
+        </Panel>
+      </div>
 
       <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr_280px]">
         <Panel title="Agents">

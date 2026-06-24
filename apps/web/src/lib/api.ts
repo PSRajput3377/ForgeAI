@@ -13,6 +13,32 @@ export interface ForgeEvent {
   timestamp: string | null;
 }
 
+export interface RunResult {
+  final_response: string;
+  review_verdict: string;
+  tasks: number;
+  files_changed: string[];
+  retries: number;
+}
+
+/** Kick off the multi-agent workflow for a task. Resolves when the run finishes;
+ *  the timeline/agents/metrics panels update live over the WebSocket meanwhile. */
+export async function runAgents(
+  userRequest: string,
+  projectId?: string
+): Promise<RunResult> {
+  const res = await fetch(`${API_URL}/agents/run`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ user_request: userRequest, project_id: projectId ?? null }),
+  });
+  if (!res.ok) {
+    const detail = (await res.json().catch(() => ({}))).detail;
+    throw new Error(detail ?? `Run failed (${res.status})`);
+  }
+  return res.json();
+}
+
 export async function getMetrics() {
   const res = await fetch(`${API_URL}/observability/metrics`);
   return res.json();
