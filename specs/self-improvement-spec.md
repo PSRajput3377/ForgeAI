@@ -225,7 +225,7 @@ action (§8), never automatic.
 - [x] Multi-agent debate runs behind a config flag, off by default, deterministic
       under `EchoModel`.
 - [x] Rule-based dynamic agent selection works and is recorded with rationale.
-- [ ] The Agent Analytics tab renders per-agent deltas and prompt comparison.
+- [x] The Agent Analytics tab renders per-agent deltas and prompt comparison.
 - [ ] Offline suite green; ruff + black clean; docs updated; an ADR records the
       measurement-substrate design.
 

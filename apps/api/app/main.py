@@ -11,6 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from loguru import logger
 
 from app.api.agents import router as agents_router
+from app.api.analytics import router as analytics_router
 from app.api.auth import router as auth_router
 from app.api.github import router as github_router
 from app.api.health import router as health_router
@@ -52,6 +53,7 @@ app.add_middleware(
 app.include_router(health_router)
 app.include_router(agents_router)
 app.include_router(observability_router)
+app.include_router(analytics_router)
 app.include_router(auth_router)
 app.include_router(organizations_router)
 app.include_router(github_router)

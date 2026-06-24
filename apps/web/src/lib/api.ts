@@ -44,6 +44,41 @@ export async function getMetrics() {
   return res.json();
 }
 
+// --- Agent Analytics (Phase 12.8) ---
+
+export interface Stats {
+  runs: number;
+  success_rate: number;
+  mean_score: number;
+  avg_retries: number;
+  avg_time_s: number;
+  accepted_pr_rate: number | null;
+}
+
+export interface PromptVersionStats {
+  active_version: string | null;
+  versions: Record<string, Stats>;
+}
+
+export async function getAnalyticsOverview(): Promise<Stats> {
+  const res = await fetch(`${API_URL}/analytics/overview`);
+  return res.json();
+}
+
+export async function getPromptComparison(): Promise<Record<string, PromptVersionStats>> {
+  const res = await fetch(`${API_URL}/analytics/prompts`);
+  if (!res.ok) return {};
+  return (await res.json()).roles ?? {};
+}
+
+export async function getBenchmarkTrend(): Promise<
+  { forge_version: string; pass_rate: number }[]
+> {
+  const res = await fetch(`${API_URL}/analytics/benchmarks/trend`);
+  if (!res.ok) return [];
+  return (await res.json()).trend ?? [];
+}
+
 export async function getTimeline(runId: string) {
   const res = await fetch(`${API_URL}/observability/timeline/${runId}`);
   return res.json();

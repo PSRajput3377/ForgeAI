@@ -22,6 +22,10 @@ export default function WorkspacePage() {
     <main className="min-h-screen p-6">
       <header className="mb-6 flex items-center justify-between">
         <h1 className="text-xl font-semibold">ForgeAI Workspace</h1>
+        <div className="flex items-center gap-4">
+        <a href="/analytics" className="text-xs text-neutral-400 hover:text-neutral-200">
+          Analytics →
+        </a>
         <span className="flex items-center gap-2 text-xs">
           <span
             className={`h-2 w-2 rounded-full ${
@@ -30,6 +34,7 @@ export default function WorkspacePage() {
           />
           {status === "open" ? "live" : status}
         </span>
+        </div>
       </header>
 
       {/* Entry point: describe a task and run the agent team */}

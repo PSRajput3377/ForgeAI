@@ -10,10 +10,15 @@ the offline path is exercised by the test suite via EchoProvider.
 
 from __future__ import annotations
 
-from fastapi import APIRouter
+from evaluation import EvaluationStore
+from fastapi import APIRouter, Depends
+from prompts import active_versions
 from pydantic import BaseModel
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents_runtime import run_request
+from app.db.base import get_session
+from app.performance import PerformanceStore
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -33,13 +38,35 @@ class RunResponse(BaseModel):
 
 
 @router.post("/run", response_model=RunResponse)
-async def run(body: RunRequest) -> RunResponse:
-    """Run the full agent workflow for a user request."""
+async def run(body: RunRequest, session: AsyncSession = Depends(get_session)) -> RunResponse:
+    """Run the full agent workflow for a user request.
+
+    The run is scored (Phase 12.1) and the evaluation persisted to the
+    Performance Database (12.2), so the Agent Analytics dashboard reflects it.
+    """
+    eval_store = EvaluationStore()
     state = await run_request(
         body.user_request,
         project_id=body.project_id,
         project_path=body.project_path,
+        evaluation_store=eval_store,
     )
+
+    # Persist the scored evaluation (best-effort; a run still succeeds even if
+    # the analytics write fails — e.g. no DB configured).
+    record = eval_store.for_run(state.project_id or "") or (
+        eval_store.all()[-1] if eval_store.all() else None
+    )
+    if record is not None:
+        record.prompt_versions = record.prompt_versions or active_versions()
+        try:
+            await PerformanceStore(session).add(record)
+        except Exception:  # noqa: BLE001 — analytics persistence is non-critical
+            try:
+                await session.rollback()
+            except Exception:  # noqa: BLE001
+                pass
+
     return RunResponse(
         final_response=state.final_response,
         review_verdict=state.review_verdict.value,
