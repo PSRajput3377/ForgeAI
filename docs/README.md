@@ -20,6 +20,7 @@ Everything you need to understand ForgeAI **without reading the source code**.
 | Understand observability & the workspace | [observability.md](observability.md) |
 | Understand auth, teams & multi-tenancy | [auth.md](auth.md)                |
 | Understand GitHub integration & PR/CI automation | [github.md](github.md)  |
+| Understand enterprise integrations & knowledge graph | [integrations.md](integrations.md) |
 | See the database schema                | [database.md](database.md)        |
 | Use the API                            | [api.md](api.md)                  |
 | Read the agent prompts                 | [prompts.md](prompts.md)          |
