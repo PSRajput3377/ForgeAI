@@ -20,6 +20,7 @@ current implementation.
 | [auth-spec.md](auth-spec.md) | Authentication, RBAC, workspace isolation, invitations |
 | [github-spec.md](github-spec.md) | Provider, branching, PRs, CI, autonomous loop |
 | [integrations-spec.md](integrations-spec.md) | Connectors, hub, permissions, approvals, knowledge graph |
+| [production-spec.md](production-spec.md) | Queue, reliability, rate limits, health, metrics, parallelism |
 | [state-spec.md](state-spec.md) | `ProjectState` field rules & invariants |
 | [api-contracts.md](api-contracts.md) | Request/response contracts per endpoint |
 | [prompt-spec.md](prompt-spec.md) | What a well-formed agent prompt must contain |

@@ -19,8 +19,8 @@ The canonical phase roadmap lives in
 | 8     | GitHub Integration & Autonomous Workflow | ✅ Complete |
 | 8.1   | GitHub Hardening (local commits, rate limits, pagination, webhooks) | ✅ Offline-verified; live sandbox pending |
 | 9     | Enterprise Integrations & Ecosystem | ✅ Complete |
-| 10    | Dashboard                      | ⬜ Not started |
-| 11    | Deployment                     | ⬜ Not started |
+| 10    | Production: Scale, Security & Reliability | ✅ Complete |
+| 11    | Dashboard & Deployment         | ⬜ Not started |
 
 > Database work (async SQLAlchemy, ADR-0018) landed inside Phase 7 because
 > auth/multi-tenancy requires it — there is no longer a standalone DB phase.
