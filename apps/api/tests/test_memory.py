@@ -18,9 +18,7 @@ async def test_store_and_retrieve_project_memory():
     m = mgr()
     await m.store_memory(MemoryScope.PROJECT, "framework", "FastAPI", project_id="p1")
     await m.store_memory(MemoryScope.PROJECT, "style", "Black", project_id="p1")
-    items = await m.retrieve(
-        MemoryScope.PROJECT, project_id="p1", current_project_id="p1"
-    )
+    items = await m.retrieve(MemoryScope.PROJECT, project_id="p1", current_project_id="p1")
     assert {i.key for i in items} == {"framework", "style"}
 
 
@@ -75,9 +73,7 @@ def test_scoring_project_relevance_bonus():
 async def test_conversation_compression():
     m = mgr()
     for i in range(25):
-        await m.store_memory(
-            MemoryScope.SESSION, f"msg{i}", f"message {i}", session_id="s1"
-        )
+        await m.store_memory(MemoryScope.SESSION, f"msg{i}", f"message {i}", session_id="s1")
     summary = await m.compress_session("s1", keep_last=10)
     assert summary is not None and summary.key == "summary"
     remaining = await m.store.query(MemoryScope.SESSION, session_id="s1")
@@ -96,9 +92,7 @@ async def test_compression_noop_when_short():
 @pytest.mark.asyncio
 async def test_context_builder_assembles_sections():
     m = mgr()
-    await m.store_memory(
-        MemoryScope.PROJECT, "stack", "FastAPI + Next.js", project_id="p1"
-    )
+    await m.store_memory(MemoryScope.PROJECT, "stack", "FastAPI + Next.js", project_id="p1")
     await m.store_memory(MemoryScope.USER, "formatter", "Prettier", user_id="u1")
     builder = ContextBuilder(m)
     ctx = await builder.build("add dark mode", project_id="p1", user_id="u1")
@@ -107,13 +101,9 @@ async def test_context_builder_assembles_sections():
 
 
 def test_detect_project_python_and_node(tmp_path):
-    (tmp_path / "pyproject.toml").write_text(
-        "[project]\ndependencies=['fastapi','sqlalchemy']"
-    )
+    (tmp_path / "pyproject.toml").write_text("[project]\ndependencies=['fastapi','sqlalchemy']")
     (tmp_path / "uv.lock").write_text("")
-    (tmp_path / "package.json").write_text(
-        '{"dependencies":{"next":"15","tailwindcss":"3"}}'
-    )
+    (tmp_path / "package.json").write_text('{"dependencies":{"next":"15","tailwindcss":"3"}}')
     (tmp_path / "pnpm-lock.yaml").write_text("")
     profile = detect_project(tmp_path)
     assert "python" in profile.languages

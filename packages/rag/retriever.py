@@ -37,7 +37,5 @@ class Retriever:
 
         vector = await self.embedder.embed(query)
         hits = await self.store.search(vector, limit=limit)
-        await self.cache.set(
-            cache_key, [h.model_dump() for h in hits], ttl=self.cache_ttl
-        )
+        await self.cache.set(cache_key, [h.model_dump() for h in hits], ttl=self.cache_ttl)
         return hits

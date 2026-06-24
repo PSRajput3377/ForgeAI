@@ -42,11 +42,7 @@ def map_webhook(github_event: str, payload: dict) -> Event:
     if github_event in ("check_run", "check_suite"):
         block = payload.get(github_event, {})
         conclusion = block.get("conclusion")
-        etype = (
-            EventType.BUILD_FAILED
-            if conclusion == "failure"
-            else EventType.BUILD_PASSED
-        )
+        etype = EventType.BUILD_FAILED if conclusion == "failure" else EventType.BUILD_PASSED
         return Event(
             type=etype,
             payload={

@@ -77,9 +77,7 @@ class TerminalTool(Tool):
         except ValueError as exc:
             return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, str(exc))
         if not tokens:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, "Empty command"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, "Empty command")
         lowered = {t.lower() for t in tokens}
         if lowered & BLOCKED_TOKENS or "rm" in lowered:
             return ToolResult.fail(
@@ -100,9 +98,7 @@ class TerminalTool(Tool):
             return self._unknown_action(tool_input.action)
         command = tool_input.args.get("command")
         if not command:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, "Missing command"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, "Missing command")
 
         blocked = self._check(command)
         if blocked is not None:

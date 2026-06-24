@@ -52,15 +52,11 @@ class UserOut(BaseModel):
 
 
 @router.post("/register", response_model=UserOut, status_code=201)
-async def register(
-    body: RegisterRequest, session: AsyncSession = Depends(get_session)
-) -> UserOut:
+async def register(body: RegisterRequest, session: AsyncSession = Depends(get_session)) -> UserOut:
     existing = await session.execute(select(User).where(User.email == body.email))
     if existing.scalar_one_or_none() is not None:
         raise HTTPException(status.HTTP_409_CONFLICT, "Email already registered")
-    user = User(
-        email=body.email, name=body.name, password_hash=hash_password(body.password)
-    )
+    user = User(email=body.email, name=body.name, password_hash=hash_password(body.password))
     session.add(user)
     await session.commit()
     await session.refresh(user)
@@ -68,9 +64,7 @@ async def register(
 
 
 @router.post("/login", response_model=TokenPair)
-async def login(
-    body: LoginRequest, session: AsyncSession = Depends(get_session)
-) -> TokenPair:
+async def login(body: LoginRequest, session: AsyncSession = Depends(get_session)) -> TokenPair:
     result = await session.execute(select(User).where(User.email == body.email))
     user = result.scalar_one_or_none()
     if user is None or not verify_password(body.password, user.password_hash):

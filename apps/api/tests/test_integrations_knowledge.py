@@ -39,9 +39,7 @@ async def test_cross_system_answer_gathers_evidence_and_related():
     await hub.connector(System.NOTION).create(
         "page", title="Auth RFC", body="JWT chosen because stateless"
     )
-    await hub.connector(System.SLACK).create(
-        "message", body="we picked jwt for statelessness"
-    )
+    await hub.connector(System.SLACK).create("message", body="we picked jwt for statelessness")
     hub.graph.link("notion:auth-rfc", "jira:JIRA-142", "references")
 
     answer = await hub.answer("why jwt")

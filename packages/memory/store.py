@@ -17,9 +17,7 @@ class MemoryStore(ABC):
     async def put(self, item: MemoryItem) -> None: ...
 
     @abstractmethod
-    async def get(
-        self, scope: MemoryScope, key: str, **owner: str
-    ) -> MemoryItem | None: ...
+    async def get(self, scope: MemoryScope, key: str, **owner: str) -> MemoryItem | None: ...
 
     @abstractmethod
     async def query(self, scope: MemoryScope, **owner: str) -> list[MemoryItem]: ...
@@ -38,9 +36,7 @@ class InMemoryStore(MemoryStore):
     def __init__(self) -> None:
         self._items: list[MemoryItem] = []
 
-    def _find(
-        self, scope: MemoryScope, key: str, owner: dict[str, str]
-    ) -> MemoryItem | None:
+    def _find(self, scope: MemoryScope, key: str, owner: dict[str, str]) -> MemoryItem | None:
         for it in self._items:
             if it.scope == scope and it.key == key and _owner_matches(it, owner):
                 return it
@@ -61,15 +57,11 @@ class InMemoryStore(MemoryStore):
             self._items.remove(existing)
         self._items.append(item)
 
-    async def get(
-        self, scope: MemoryScope, key: str, **owner: str
-    ) -> MemoryItem | None:
+    async def get(self, scope: MemoryScope, key: str, **owner: str) -> MemoryItem | None:
         return self._find(scope, key, owner)
 
     async def query(self, scope: MemoryScope, **owner: str) -> list[MemoryItem]:
-        return [
-            it for it in self._items if it.scope == scope and _owner_matches(it, owner)
-        ]
+        return [it for it in self._items if it.scope == scope and _owner_matches(it, owner)]
 
     async def delete(self, scope: MemoryScope, key: str, **owner: str) -> None:
         found = self._find(scope, key, owner)

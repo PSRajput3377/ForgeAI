@@ -13,9 +13,7 @@ def repo():
 
 def test_branch_naming():
     assert branch_name_for("feature", "Add JWT Auth") == "feature/add-jwt-auth"
-    assert (
-        branch_name_for("bug", "Token validation fails") == "fix/token-validation-fails"
-    )
+    assert branch_name_for("bug", "Token validation fails") == "fix/token-validation-fails"
     assert branch_name_for("docs", "Update README") == "docs/update-readme"
 
 

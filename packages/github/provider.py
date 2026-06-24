@@ -50,9 +50,7 @@ class GitHubProvider(ABC):
     async def get_pull_request(self, repo: Repository, number: int) -> PullRequest: ...
 
     @abstractmethod
-    async def merge_pull_request(
-        self, repo: Repository, number: int
-    ) -> PullRequest: ...
+    async def merge_pull_request(self, repo: Repository, number: int) -> PullRequest: ...
 
     @abstractmethod
     async def post_review(self, repo: Repository, review: Review) -> Review: ...
@@ -116,9 +114,7 @@ class FakeGitHubProvider(GitHubProvider):
 
     async def open_pull_request(self, repo, title, body, head, base) -> PullRequest:
         self._pr_counter += 1
-        pr = PullRequest(
-            number=self._pr_counter, title=title, body=body, head=head, base=base
-        )
+        pr = PullRequest(number=self._pr_counter, title=title, body=body, head=head, base=base)
         self.prs[pr.number] = pr
         return pr
 
@@ -137,11 +133,7 @@ class FakeGitHubProvider(GitHubProvider):
     async def get_check_runs(self, repo, number) -> list[CheckRun]:
         script = self._ci_script.get(number)
         status = script.pop(0) if script else CIStatus.SUCCESS
-        logs = (
-            "ModuleNotFoundError: No module named 'jwt'"
-            if status == CIStatus.FAILURE
-            else ""
-        )
+        logs = "ModuleNotFoundError: No module named 'jwt'" if status == CIStatus.FAILURE else ""
         return [CheckRun(pr_number=number, name="ci", status=status, logs=logs)]
 
     async def list_issues(self, repo) -> list[Issue]:

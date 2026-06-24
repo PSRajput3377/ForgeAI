@@ -58,8 +58,7 @@ class ContextBuilder:
             )
             if proj:
                 sections.append(
-                    "## Project notes\n"
-                    + "\n".join(f"- {m.key}: {m.value}" for m in proj)
+                    "## Project notes\n" + "\n".join(f"- {m.key}: {m.value}" for m in proj)
                 )
 
         # 3. User preferences.
@@ -69,8 +68,7 @@ class ContextBuilder:
             )
             if prefs:
                 sections.append(
-                    "## User preferences\n"
-                    + "\n".join(f"- {m.key}: {m.value}" for m in prefs)
+                    "## User preferences\n" + "\n".join(f"- {m.key}: {m.value}" for m in prefs)
                 )
 
         # 4. Recent conversation (session).
@@ -80,8 +78,7 @@ class ContextBuilder:
             )
             if convo:
                 sections.append(
-                    "## Recent conversation\n"
-                    + "\n".join(f"- {m.key}: {m.value}" for m in convo)
+                    "## Recent conversation\n" + "\n".join(f"- {m.key}: {m.value}" for m in convo)
                 )
 
         context = "\n\n".join(sections)

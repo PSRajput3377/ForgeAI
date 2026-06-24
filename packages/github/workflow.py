@@ -60,9 +60,7 @@ class GitHubWorkflow:
             files=sorted(plan.files.keys()),
         )
 
-    async def execute(
-        self, repo: Repository, plan: PRPlan, request_id: str
-    ) -> WorkflowOutcome:
+    async def execute(self, repo: Repository, plan: PRPlan, request_id: str) -> WorkflowOutcome:
         """Execute the plan — but only if the approval request is approved.
 
         Raises PermissionError if the request is missing or not approved, so a
@@ -80,9 +78,7 @@ class GitHubWorkflow:
         branch = await self.manager.create_branch(repo, plan.kind, plan.task)
         timeline.append(f"Created branch {branch.name}")
 
-        await self.manager.create_commit(
-            repo, branch.name, plan.commit_message, plan.files
-        )
+        await self.manager.create_commit(repo, branch.name, plan.commit_message, plan.files)
         timeline.append(f"Committed: {plan.commit_message}")
 
         pr = await self.manager.create_pr(

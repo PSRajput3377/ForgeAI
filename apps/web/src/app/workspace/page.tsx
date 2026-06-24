@@ -1,15 +1,17 @@
 "use client";
 
 /**
- * Developer Workspace — the live observability screen (Phase 6).
+ * Developer Workspace (Phase 6 + 11).
  *
- * Three panels: agent status (left), live timeline (center), metrics (right) —
- * all driven by the backend event WebSocket. Think Cursor + GitHub Actions +
- * LangSmith in one view.
+ * The PR Approval Center is the centerpiece: pending proposals from the agent
+ * pipeline, with Review (diff) → Approve (one-click → creates the GitHub PR) /
+ * Reject. Below it, the live observability panels (agents, timeline, metrics)
+ * driven by the backend event WebSocket.
  */
 import { useEventStream } from "@/hooks/useEventStream";
 import { AgentStatus } from "@/components/AgentStatus";
 import { AgentTimeline } from "@/components/AgentTimeline";
+import { ApprovalCenter } from "@/components/ApprovalCenter";
 import { MetricsPanel } from "@/components/MetricsPanel";
 
 export default function WorkspacePage() {
@@ -29,7 +31,12 @@ export default function WorkspacePage() {
         </span>
       </header>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr_280px]">
+      {/* Centerpiece: PR Approval Center */}
+      <Panel title="Pending Approvals">
+        <ApprovalCenter />
+      </Panel>
+
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr_280px]">
         <Panel title="Agents">
           <AgentStatus events={events} />
         </Panel>

@@ -11,9 +11,7 @@ def test_agents_run_endpoint(echo_router):
     """The endpoint runs the full workflow and returns a structured result."""
     with patch("app.agents_runtime.build_router", return_value=echo_router):
         client = TestClient(app)
-        resp = client.post(
-            "/agents/run", json={"user_request": "Add JWT authentication"}
-        )
+        resp = client.post("/agents/run", json={"user_request": "Add JWT authentication"})
 
     assert resp.status_code == 200
     body = resp.json()

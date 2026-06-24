@@ -29,9 +29,7 @@ def build_embedder() -> OllamaEmbedder:
 
 
 def build_vector_store(collection: str = "forge_project") -> QdrantVectorStore:
-    return QdrantVectorStore(
-        url=settings.qdrant_url, collection=collection, dim=EMBED_DIM
-    )
+    return QdrantVectorStore(url=settings.qdrant_url, collection=collection, dim=EMBED_DIM)
 
 
 def build_cache() -> RedisCache:
@@ -40,9 +38,7 @@ def build_cache() -> RedisCache:
 
 def build_retriever(collection: str = "forge_project") -> Retriever:
     """Assemble the production retriever (Ollama + Qdrant + Redis cache)."""
-    return Retriever(
-        build_embedder(), build_vector_store(collection), cache=build_cache()
-    )
+    return Retriever(build_embedder(), build_vector_store(collection), cache=build_cache())
 
 
 def build_context_builder(collection: str = "forge_project") -> ContextBuilder:

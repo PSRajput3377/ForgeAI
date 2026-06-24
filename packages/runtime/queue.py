@@ -78,9 +78,7 @@ class JobQueue:
                 job.result = await handler(job.payload)
                 job.status = JobStatus.SUCCEEDED
                 return
-            except (
-                Exception
-            ) as exc:  # noqa: BLE001 - job failures are data, not crashes
+            except Exception as exc:  # noqa: BLE001 - job failures are data, not crashes
                 job.error = str(exc)
         # Exhausted retries → dead-letter.
         job.status = JobStatus.DEAD

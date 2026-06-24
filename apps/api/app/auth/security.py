@@ -42,23 +42,17 @@ def _create_token(subject: str, token_type: str, expires_delta: timedelta) -> st
 
 
 def create_access_token(user_id: str) -> str:
-    return _create_token(
-        user_id, "access", timedelta(minutes=settings.access_token_minutes)
-    )
+    return _create_token(user_id, "access", timedelta(minutes=settings.access_token_minutes))
 
 
 def create_refresh_token(user_id: str) -> str:
-    return _create_token(
-        user_id, "refresh", timedelta(days=settings.refresh_token_days)
-    )
+    return _create_token(user_id, "refresh", timedelta(days=settings.refresh_token_days))
 
 
 def decode_token(token: str, *, expected_type: str | None = None) -> dict:
     """Decode and validate a JWT. Raises ValueError on any problem."""
     try:
-        payload = jwt.decode(
-            token, settings.jwt_secret, algorithms=[settings.jwt_algorithm]
-        )
+        payload = jwt.decode(token, settings.jwt_secret, algorithms=[settings.jwt_algorithm])
     except JWTError as exc:
         raise ValueError(f"Invalid token: {exc}") from exc
     if expected_type and payload.get("type") != expected_type:

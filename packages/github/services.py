@@ -41,9 +41,7 @@ class BranchService:
     def __init__(self, provider: GitHubProvider):
         self.provider = provider
 
-    async def create_task_branch(
-        self, repo: Repository, kind: str, task: str
-    ) -> Branch:
+    async def create_task_branch(self, repo: Repository, kind: str, task: str) -> Branch:
         return await self.provider.create_branch(
             repo, branch_name_for(kind, task), repo.default_branch
         )
@@ -72,9 +70,7 @@ class PullRequestService:
             f"## Testing\n\n{testing}\n"
         )
 
-    async def open(
-        self, repo, title, summary, changes, testing, head, base="main"
-    ) -> PullRequest:
+    async def open(self, repo, title, summary, changes, testing, head, base="main") -> PullRequest:
         body = self.render_body(summary, changes, testing)
         return await self.provider.open_pull_request(repo, title, body, head, base)
 

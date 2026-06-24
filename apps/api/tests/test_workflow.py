@@ -59,9 +59,6 @@ async def test_manager_never_writes_code(echo_router):
     """Architecture invariant: no file is attributed to the Manager."""
     state = await run_workflow(echo_router, "Add a CRUD API")
     manager_files = [
-        f
-        for m in state.messages
-        if m.sender == AgentRole.MANAGER
-        for f in m.files_changed
+        f for m in state.messages if m.sender == AgentRole.MANAGER for f in m.files_changed
     ]
     assert manager_files == []

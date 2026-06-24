@@ -72,20 +72,14 @@ async def test_metrics_aggregation():
     metrics = MetricsCollector()
     bus.subscribe(metrics.handle)
 
-    await bus.emit(
-        EventType.AGENT_COMPLETED, agent="planner", payload={"duration": 1.0}
-    )
-    await bus.emit(
-        EventType.AGENT_COMPLETED, agent="planner", payload={"duration": 3.0}
-    )
+    await bus.emit(EventType.AGENT_COMPLETED, agent="planner", payload={"duration": 1.0})
+    await bus.emit(EventType.AGENT_COMPLETED, agent="planner", payload={"duration": 3.0})
     await bus.emit(EventType.AGENT_FAILED, agent="coder", payload={"duration": 2.0})
     await bus.emit(
         EventType.TOOL_COMPLETED,
         payload={"tool": "filesystem", "duration": 0.1, "success": True},
     )
-    await bus.emit(
-        EventType.RUN_COMPLETED, payload={"success": True, "prompt_tokens": 100}
-    )
+    await bus.emit(EventType.RUN_COMPLETED, payload={"success": True, "prompt_tokens": 100})
 
     snap = metrics.snapshot()
     assert snap["agents"]["planner"]["success_rate"] == 1.0

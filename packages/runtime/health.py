@@ -41,9 +41,7 @@ class HealthRegistry:
         for name, check in self._checks.items():
             try:
                 ok = await check()
-            except (
-                Exception
-            ):  # noqa: BLE001 - a failing check is unhealthy, not a crash
+            except Exception:  # noqa: BLE001 - a failing check is unhealthy, not a crash
                 ok = False
             components.append(ComponentHealth(name=name, healthy=ok))
 

@@ -26,9 +26,7 @@ def test_retry_after_header_seconds():
 
 
 def test_retry_after_from_ratelimit_reset():
-    resp = httpx.Response(
-        403, headers={"X-RateLimit-Remaining": "0", "X-RateLimit-Reset": "100"}
-    )
+    resp = httpx.Response(403, headers={"X-RateLimit-Remaining": "0", "X-RateLimit-Reset": "100"})
     assert retry_after_seconds(resp, now=40.0) == 60.0
 
 
@@ -53,9 +51,7 @@ async def test_backoff_retries_then_succeeds():
         slept.append(s)
 
     transport = httpx.MockTransport(handler)
-    async with httpx.AsyncClient(
-        transport=transport, base_url="https://api.github.com"
-    ) as client:
+    async with httpx.AsyncClient(transport=transport, base_url="https://api.github.com") as client:
         resp = await request_with_backoff(client, "GET", "/rate", sleep=fake_sleep)
 
     assert resp.status_code == 200
@@ -72,12 +68,8 @@ async def test_backoff_gives_up_after_max_retries():
         pass
 
     transport = httpx.MockTransport(handler)
-    async with httpx.AsyncClient(
-        transport=transport, base_url="https://api.github.com"
-    ) as client:
-        resp = await request_with_backoff(
-            client, "GET", "/rate", max_retries=2, sleep=fake_sleep
-        )
+    async with httpx.AsyncClient(transport=transport, base_url="https://api.github.com") as client:
+        resp = await request_with_backoff(client, "GET", "/rate", max_retries=2, sleep=fake_sleep)
     assert resp.status_code == 429  # returns the last response, doesn't loop forever
 
 
@@ -96,8 +88,6 @@ async def test_pagination_follows_next_links():
         return httpx.Response(200, json=body, headers=headers)
 
     transport = httpx.MockTransport(handler)
-    async with httpx.AsyncClient(
-        transport=transport, base_url="https://api.github.com"
-    ) as client:
+    async with httpx.AsyncClient(transport=transport, base_url="https://api.github.com") as client:
         items = await paginate(client, "/items")
     assert items == [1, 2, 3, 4, 5]

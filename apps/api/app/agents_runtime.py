@@ -47,6 +47,4 @@ async def run_request(user_request: str, **kwargs) -> ProjectState:
     """
     from app.observability_runtime import observability
 
-    return await run_workflow(
-        build_router(), user_request, bus=observability.bus, **kwargs
-    )
+    return await run_workflow(build_router(), user_request, bus=observability.bus, **kwargs)

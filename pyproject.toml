@@ -1,0 +1,15 @@
+# Root tooling config — applies to packages/ (and anything outside apps/api).
+# Keeps Black/Ruff consistent across the whole repo (line-length 100), so
+# formatting a single path can't drift from the combined check.
+
+[tool.black]
+line-length = 100
+target-version = ["py312"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "C4"]
+ignore = ["B008"]  # FastAPI uses Depends(...) as argument defaults by design

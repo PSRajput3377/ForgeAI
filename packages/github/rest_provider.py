@@ -67,9 +67,7 @@ class RestGitHubProvider(GitHubProvider):
         return [Branch(name=b["name"], sha=b["commit"]["sha"]) for b in data]
 
     async def create_branch(self, repo: Repository, name: str, base: str) -> Branch:
-        ref = await self._request(
-            "GET", f"/repos/{repo.full_name}/git/ref/heads/{base}"
-        )
+        ref = await self._request("GET", f"/repos/{repo.full_name}/git/ref/heads/{base}")
         base_sha = ref["object"]["sha"]
         await self._request(
             "POST",
@@ -91,9 +89,7 @@ class RestGitHubProvider(GitHubProvider):
             f"/repos/{repo.full_name}/pulls",
             json={"title": title, "body": body, "head": head, "base": base},
         )
-        return PullRequest(
-            number=data["number"], title=title, body=body, head=head, base=base
-        )
+        return PullRequest(number=data["number"], title=title, body=body, head=head, base=base)
 
     async def get_pull_request(self, repo, number) -> PullRequest:
         d = await self._request("GET", f"/repos/{repo.full_name}/pulls/{number}")
@@ -129,18 +125,12 @@ class RestGitHubProvider(GitHubProvider):
 
     async def get_check_runs(self, repo, number) -> list[CheckRun]:
         pr = await self.get_pull_request(repo, number)
-        ref = await self._request(
-            "GET", f"/repos/{repo.full_name}/git/ref/heads/{pr.head}"
-        )
+        ref = await self._request("GET", f"/repos/{repo.full_name}/git/ref/heads/{pr.head}")
         sha = ref["object"]["sha"]
-        data = await self._request(
-            "GET", f"/repos/{repo.full_name}/commits/{sha}/check-runs"
-        )
+        data = await self._request("GET", f"/repos/{repo.full_name}/commits/{sha}/check-runs")
         runs = []
         for r in data.get("check_runs", []):
-            status = _CI_MAP.get(
-                r.get("conclusion") or r.get("status"), CIStatus.PENDING
-            )
+            status = _CI_MAP.get(r.get("conclusion") or r.get("status"), CIStatus.PENDING)
             runs.append(CheckRun(pr_number=number, name=r["name"], status=status))
         return runs
 

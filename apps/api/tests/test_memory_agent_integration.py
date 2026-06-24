@@ -25,6 +25,5 @@ async def test_memory_agent_injects_project_context(echo_router):
     # The project's remembered stack made it into the shared context.
     assert "Tailwind + Zustand + TypeScript" in result.project_context
     assert any(
-        m.sender == AgentRole.MEMORY and "context" in m.summary.lower()
-        for m in result.messages
+        m.sender == AgentRole.MEMORY and "context" in m.summary.lower() for m in result.messages
     )

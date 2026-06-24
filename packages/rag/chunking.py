@@ -50,11 +50,7 @@ def chunk_text(
         window = words[start : start + chunk_size]
         if not window:
             break
-        chunks.append(
-            Chunk(
-                text=" ".join(window), index=idx, metadata={**base_meta, "chunk": idx}
-            )
-        )
+        chunks.append(Chunk(text=" ".join(window), index=idx, metadata={**base_meta, "chunk": idx}))
         idx += 1
         if start + chunk_size >= len(words):
             break

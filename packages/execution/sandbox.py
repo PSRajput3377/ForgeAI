@@ -97,9 +97,7 @@ class FakeSandbox(Sandbox):
         self.calls.append(command)
         if self.responder is not None:
             return self.responder(command, idx)
-        return ExecutionResult(
-            command=command, success=True, exit_code=0, sandbox=self.name
-        )
+        return ExecutionResult(command=command, success=True, exit_code=0, sandbox=self.name)
 
 
 class LocalSandbox(Sandbox):

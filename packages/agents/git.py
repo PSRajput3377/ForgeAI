@@ -29,9 +29,7 @@ class GitAgent(BaseAgent):
         self.repo = repo
 
     async def run(self, state: ProjectState) -> ProjectState:
-        message = await self._ask(
-            f"Write a conventional-commit message for: {state.user_request}"
-        )
+        message = await self._ask(f"Write a conventional-commit message for: {state.user_request}")
         commit_message = message.splitlines()[0][:100] if message else "chore: update"
         task_id = state.current_task.task_id if state.current_task else "n/a"
 

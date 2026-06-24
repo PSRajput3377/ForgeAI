@@ -40,17 +40,13 @@ async def test_memory_store_retrieve_search_delete():
             args={"type": "decisions", "key": "db", "value": "use postgres"},
         )
     )
-    got = await mem.execute(
-        ToolInput(action="retrieve", args={"type": "decisions", "key": "db"})
-    )
+    got = await mem.execute(ToolInput(action="retrieve", args={"type": "decisions", "key": "db"}))
     assert got.output == "use postgres"
 
     found = await mem.execute(ToolInput(action="search", args={"query": "postgres"}))
     assert found.metadata["matches"][0]["key"] == "db"
 
-    await mem.execute(
-        ToolInput(action="delete", args={"type": "decisions", "key": "db"})
-    )
+    await mem.execute(ToolInput(action="delete", args={"type": "decisions", "key": "db"}))
     missing = await mem.execute(
         ToolInput(action="retrieve", args={"type": "decisions", "key": "db"})
     )

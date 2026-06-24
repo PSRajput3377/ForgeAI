@@ -24,9 +24,7 @@ class CoderAgent(BaseAgent):
         state.generated_code["generated/output.txt"] = code
         # If reflection produced a fix, consume it so a retry differs.
         if state.review_feedback:
-            state.generated_code[
-                "generated/output.txt"
-            ] += f"\n# applied: {state.review_feedback}"
+            state.generated_code["generated/output.txt"] += f"\n# applied: {state.review_feedback}"
 
         task_id = task.task_id if task else "n/a"
         state.record(

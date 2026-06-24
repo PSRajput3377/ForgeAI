@@ -30,9 +30,7 @@ class ExecutionAgent(BaseAgent):
     async def run(self, state: ProjectState) -> ProjectState:
         if self.engine_factory is not None:
             engine = self.engine_factory(state)
-            record = await engine.execute(
-                task=state.user_request, project=state.project_id or ""
-            )
+            record = await engine.execute(task=state.user_request, project=state.project_id or "")
             for r in record.results:
                 state.execution_logs.append(
                     f"[execution] $ {r.command} -> exit {r.exit_code}"

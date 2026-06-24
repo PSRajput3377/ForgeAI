@@ -33,18 +33,12 @@ class BrowserTool(Tool):
             return self._unknown_action(action)
         url = tool_input.args.get("url")
         if not url:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, "Missing url"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, "Missing url")
         if not url.startswith(("http://", "https://")):
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, "url must be http(s)"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, "url must be http(s)")
 
         try:
-            async with httpx.AsyncClient(
-                timeout=self.timeout, follow_redirects=True
-            ) as client:
+            async with httpx.AsyncClient(timeout=self.timeout, follow_redirects=True) as client:
                 resp = await client.get(url)
                 resp.raise_for_status()
                 html = resp.text

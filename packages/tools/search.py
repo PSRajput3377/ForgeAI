@@ -29,9 +29,7 @@ class SearchTool(Tool):
             return self._unknown_action(tool_input.action)
         query = tool_input.args.get("query")
         if not query:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, "Missing query"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, "Missing query")
         limit = int(tool_input.args.get("limit", 50))
 
         results: list[dict] = []

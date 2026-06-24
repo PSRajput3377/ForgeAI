@@ -25,9 +25,7 @@ def github_configured() -> bool:
 def build_provider() -> GitHubProvider:
     """Return the live provider when a token is set, else the offline fake."""
     if github_configured():
-        return RestGitHubProvider(
-            token=settings.github_token, api_url=settings.github_api_url
-        )
+        return RestGitHubProvider(token=settings.github_token, api_url=settings.github_api_url)
     return FakeGitHubProvider()
 
 

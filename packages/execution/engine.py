@@ -68,9 +68,7 @@ class ExecutionEngine:
             result = await self.sandbox.run(command)
             self.logs.add(result)
             if not result.success:
-                error = classify_error(
-                    result.stderr, result.stdout, timed_out=result.timed_out
-                )
+                error = classify_error(result.stderr, result.stdout, timed_out=result.timed_out)
                 return StepOutcome(name=name, result=result, error=error)
         return None
 
@@ -103,9 +101,7 @@ class ExecutionEngine:
         finally:
             await self.sandbox.teardown()
 
-    def _record(
-        self, task: str, project: str, *, success: bool, retries: int
-    ) -> RunRecord:
+    def _record(self, task: str, project: str, *, success: bool, retries: int) -> RunRecord:
         return RunRecord(
             task=task,
             project=project,

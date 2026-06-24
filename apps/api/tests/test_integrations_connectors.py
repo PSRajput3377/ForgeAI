@@ -36,9 +36,7 @@ async def test_slack_post_message():
 @pytest.mark.asyncio
 async def test_notion_write_then_search():
     notion = FakeNotionConnector()
-    await notion.create(
-        "page", title="Auth Design", body="We use JWT because it is stateless"
-    )
+    await notion.create("page", title="Auth Design", body="We use JWT because it is stateless")
     hits = await notion.search("jwt")
     assert len(hits) == 1 and hits[0].title == "Auth Design"
 
@@ -46,9 +44,7 @@ async def test_notion_write_then_search():
 @pytest.mark.asyncio
 async def test_email_is_send_only():
     email = FakeEmailConnector()
-    sent = await email.create(
-        "email", to="dev@x.com", subject="Task done", body="JWT shipped"
-    )
+    sent = await email.create("email", to="dev@x.com", subject="Task done", body="JWT shipped")
     assert email.sent == [sent]
     assert await email.search("anything") == []
 

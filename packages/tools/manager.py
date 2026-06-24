@@ -52,9 +52,7 @@ class ToolManager:
         if tool is None:
             return self._finish(
                 tool_input,
-                ToolResult.fail(
-                    tool_name, ToolErrorCode.NOT_FOUND, f"No such tool: {tool_name}"
-                ),
+                ToolResult.fail(tool_name, ToolErrorCode.NOT_FOUND, f"No such tool: {tool_name}"),
                 start,
             )
 
@@ -63,9 +61,7 @@ class ToolManager:
         if not tool_input.action:
             return self._finish(
                 tool_input,
-                ToolResult.fail(
-                    tool.name, ToolErrorCode.INVALID_INPUT, "Missing action"
-                ),
+                ToolResult.fail(tool.name, ToolErrorCode.INVALID_INPUT, "Missing action"),
                 start,
             )
 
@@ -86,16 +82,12 @@ class ToolManager:
         try:
             result = await tool.execute(tool_input)
         except Exception as exc:  # noqa: BLE001 - normalize any escape into a result
-            result = ToolResult.fail(
-                tool.name, ToolErrorCode.EXECUTION_FAILED, str(exc)
-            )
+            result = ToolResult.fail(tool.name, ToolErrorCode.EXECUTION_FAILED, str(exc))
 
         # 5/6. Stamp duration, log, return.
         return self._finish(tool_input, result, start)
 
-    def _finish(
-        self, tool_input: ToolInput, result: ToolResult, start: float
-    ) -> ToolResult:
+    def _finish(self, tool_input: ToolInput, result: ToolResult, start: float) -> ToolResult:
         """Stamp execution_time, emit a log, and return the result."""
         if result.execution_time == 0.0:
             result.execution_time = time.perf_counter() - start

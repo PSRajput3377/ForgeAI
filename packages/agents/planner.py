@@ -14,9 +14,7 @@ class PlannerAgent(BaseAgent):
 
     async def run(self, state: ProjectState) -> ProjectState:
         # Ask the model for a plan (recorded for traceability / future parsing).
-        plan_text = await self._ask(
-            f"Break this request into tasks:\n{state.user_request}"
-        )
+        plan_text = await self._ask(f"Break this request into tasks:\n{state.user_request}")
 
         # Phase 2 skeleton: a deterministic default plan mirroring the design.
         # Phase 4 replaces this with structured parsing of ``plan_text``.
@@ -29,9 +27,7 @@ class PlannerAgent(BaseAgent):
             "Review",
         ]
         state.tasks = [
-            TaskSpec(
-                title=t, assigned_to=AgentRole.CODER, description=state.user_request
-            )
+            TaskSpec(title=t, assigned_to=AgentRole.CODER, description=state.user_request)
             for t in titles
         ]
         state.current_task = state.tasks[0]

@@ -20,9 +20,7 @@ def fail_then_pass_responder(fail_times: int):
                 stderr="ModuleNotFoundError: No module named 'jwt'",
                 sandbox="fake",
             )
-        return ExecutionResult(
-            command=command, success=True, exit_code=0, sandbox="fake"
-        )
+        return ExecutionResult(command=command, success=True, exit_code=0, sandbox="fake")
 
     return responder, state
 

@@ -58,9 +58,7 @@ class ApprovalService:
     def reject(self, request_id: str, *, by: str | None = None) -> ApprovalRequest:
         return self._decide(request_id, ApprovalStatus.REJECTED, by)
 
-    def _decide(
-        self, request_id: str, status: ApprovalStatus, by: str | None
-    ) -> ApprovalRequest:
+    def _decide(self, request_id: str, status: ApprovalStatus, by: str | None) -> ApprovalRequest:
         req = self._requests.get(request_id)
         if req is None:
             raise KeyError(f"No such approval request: {request_id}")
@@ -71,6 +69,4 @@ class ApprovalService:
         return req
 
     def pending(self) -> list[ApprovalRequest]:
-        return [
-            r for r in self._requests.values() if r.status == ApprovalStatus.PENDING
-        ]
+        return [r for r in self._requests.values() if r.status == ApprovalStatus.PENDING]

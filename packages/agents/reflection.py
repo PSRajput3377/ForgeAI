@@ -26,9 +26,7 @@ class ReflectionAgent(BaseAgent):
         )
         # Clear the failure signal so the retried run can succeed, and hand the
         # fix to the Coder via review_feedback.
-        state.execution_logs.append(
-            f"[reflection] proposed fix (attempt {state.retry_count})"
-        )
+        state.execution_logs.append(f"[reflection] proposed fix (attempt {state.retry_count})")
         state.review_feedback = f"reflection-fix: {fix[:120]}"
         state.needs_reflection = False
         state.test_passed = None

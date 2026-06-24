@@ -64,9 +64,7 @@ async def test_proposal_then_human_approval_creates_pr(echo_router):
 async def test_run_without_github_only_drafts_commit(echo_router):
     # Backward compatible: no workflow wired → no proposal, graph still runs.
     app = build_workflow(echo_router)
-    result = ProjectState.model_validate(
-        await app.ainvoke(ProjectState(user_request="x"))
-    )
+    result = ProjectState.model_validate(await app.ainvoke(ProjectState(user_request="x")))
     assert result.pr_approval_id is None
     git_msgs = [m for m in result.messages if m.sender == AgentRole.GIT]
     assert git_msgs and "commit" in git_msgs[0].summary.lower()

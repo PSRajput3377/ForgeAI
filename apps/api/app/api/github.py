@@ -73,7 +73,12 @@ async def get_pull_request(owner: str, name: str, number: int) -> dict:
     return pr.model_dump()
 
 
-# --- approval-gated write workflow (Phase 8.2) ---
+# --- approval-gated write workflow (Phase 8.2 / 11) ---
+
+# In-process registry of proposals so the UI can list pending approvals, show
+# diffs, and execute by approval_id alone (true one-click approve). A row holds
+# the repo coordinates + the PRPlan behind each approval request.
+_proposals: dict[str, dict] = {}
 
 
 class ProposePR(BaseModel):
@@ -105,6 +110,24 @@ def _plan_from(body: ProposePR) -> PRPlan:
     )
 
 
+def _proposal_view(approval_id: str) -> dict:
+    row = _proposals[approval_id]
+    plan: PRPlan = row["plan"]
+    req = _approvals.get(approval_id)
+    return {
+        "approval_id": approval_id,
+        "status": req.status.value if req else "unknown",
+        "repo": row["repo"],
+        "task": plan.task,
+        "branch": plan.branch,
+        "pr_title": plan.pr_title,
+        "pr_summary": plan.pr_summary,
+        "files_changed": sorted(plan.files.keys()),
+        "testing": plan.testing,
+        "pr_url": row.get("pr_url"),
+    }
+
+
 @router.post("/pr/propose", status_code=201)
 async def propose_pr(body: ProposePR) -> dict:
     """Propose a PR — opens an approval request. Writes NOTHING to GitHub."""
@@ -112,12 +135,39 @@ async def propose_pr(body: ProposePR) -> dict:
     repo = await build_provider().get_repository(body.owner, body.name)
     plan = _plan_from(body)
     req = wf.propose(repo, plan)
+    _proposals[req.id] = {
+        "plan": plan,
+        "repo": repo.full_name,
+        "owner": body.owner,
+        "name": body.name,
+    }
+    return _proposal_view(req.id)
+
+
+@router.get("/pr/pending")
+def list_pending() -> dict:
+    """All pending PR proposals — the Approval Center's data source."""
+    pending_ids = {r.id for r in _approvals.pending()}
+    return {"pending": [_proposal_view(i) for i in _proposals if i in pending_ids]}
+
+
+@router.get("/pr/{approval_id}")
+def get_proposal(approval_id: str) -> dict:
+    """A single proposal (metadata + changed files)."""
+    if approval_id not in _proposals:
+        raise HTTPException(404, "No such proposal")
+    return _proposal_view(approval_id)
+
+
+@router.get("/pr/{approval_id}/diff")
+def get_diff(approval_id: str) -> dict:
+    """The proposed file contents — powers the Diff Viewer before approval."""
+    if approval_id not in _proposals:
+        raise HTTPException(404, "No such proposal")
+    plan: PRPlan = _proposals[approval_id]["plan"]
     return {
-        "approval_id": req.id,
-        "status": req.status.value,
-        "summary": req.summary,
-        "branch": plan.branch,
-        "note": "Approve via POST /github/pr/{approval_id}/approve, then execute.",
+        "approval_id": approval_id,
+        "files": [{"path": p, "content": c} for p, c in sorted(plan.files.items())],
     }
 
 
@@ -125,29 +175,33 @@ async def propose_pr(body: ProposePR) -> dict:
 def approve_pr(approval_id: str) -> dict:
     """Approve a pending PR proposal."""
     try:
-        req = _approvals.approve(approval_id)
+        _approvals.approve(approval_id)
     except (KeyError, ValueError) as exc:
         raise HTTPException(400, str(exc)) from exc
-    return {"approval_id": req.id, "status": req.status.value}
+    return _proposal_view(approval_id)
 
 
 @router.post("/pr/{approval_id}/reject")
 def reject_pr(approval_id: str) -> dict:
     """Reject a pending PR proposal."""
     try:
-        req = _approvals.reject(approval_id)
+        _approvals.reject(approval_id)
     except (KeyError, ValueError) as exc:
         raise HTTPException(400, str(exc)) from exc
-    return {"approval_id": req.id, "status": req.status.value}
+    return _proposal_view(approval_id)
 
 
 @router.post("/pr/{approval_id}/execute")
-async def execute_pr(approval_id: str, body: ProposePR) -> dict:
-    """Create the PR — only succeeds if the approval was granted."""
+async def execute_pr(approval_id: str) -> dict:
+    """One-click: create the PR from the stored plan — only if approved."""
+    if approval_id not in _proposals:
+        raise HTTPException(404, "No such proposal")
+    row = _proposals[approval_id]
     wf = _workflow()
-    repo = await build_provider().get_repository(body.owner, body.name)
+    repo = await build_provider().get_repository(row["owner"], row["name"])
     try:
-        outcome = await wf.execute(repo, _plan_from(body), approval_id)
+        outcome = await wf.execute(repo, row["plan"], approval_id)
     except PermissionError as exc:
         raise HTTPException(403, str(exc)) from exc
+    row["pr_url"] = outcome.pr_url
     return outcome.model_dump()

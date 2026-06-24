@@ -46,9 +46,7 @@ async def test_clone_branch_commit_push(tmp_path):
     await forge.create_branch("feature/jwt")
     assert await forge.current_branch() == "feature/jwt"
 
-    result = await forge.commit_all(
-        "feature/jwt", "feat: add jwt", {"auth.py": "import jwt\n"}
-    )
+    result = await forge.commit_all("feature/jwt", "feat: add jwt", {"auth.py": "import jwt\n"})
     assert result.branch == "feature/jwt"
 
     # Push the feature branch to the bare remote (no network).
@@ -72,6 +70,4 @@ async def test_write_files_is_sandboxed(tmp_path):
 @pytest.mark.asyncio
 async def test_clone_failure_raises(tmp_path):
     with pytest.raises(GitCommandError):
-        await LocalRepository.clone(
-            "/nonexistent/repo.git", tmp_path / "dest", depth=None
-        )
+        await LocalRepository.clone("/nonexistent/repo.git", tmp_path / "dest", depth=None)

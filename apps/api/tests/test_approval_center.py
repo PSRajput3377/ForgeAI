@@ -18,9 +18,7 @@ async def test_request_emits_event_and_is_pending():
 
     await center.request("req-1", "git_push", branch="main")
     assert len(center.pending()) == 1
-    assert (
-        store.by_type(EventType.APPROVAL_REQUESTED)[0].payload["action"] == "git_push"
-    )
+    assert store.by_type(EventType.APPROVAL_REQUESTED)[0].payload["action"] == "git_push"
 
 
 @pytest.mark.asyncio

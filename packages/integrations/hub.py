@@ -105,8 +105,6 @@ class IntegrationHub:
             related |= self.graph.related(h.ref)
         return {
             "question": question,
-            "evidence": [
-                {"system": h.system, "ref": h.ref, "title": h.title} for h in hits
-            ],
+            "evidence": [{"system": h.system, "ref": h.ref, "title": h.title} for h in hits],
             "related_refs": sorted(related),
         }

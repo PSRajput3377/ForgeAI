@@ -22,9 +22,7 @@ class ReviewAgent(BaseAgent):
             status = MessageStatus.COMPLETED
         else:
             state.review_verdict = ReviewVerdict.CHANGES_REQUESTED
-            state.review_feedback = (
-                "Tests failed; fix the failing build before re-review."
-            )
+            state.review_feedback = "Tests failed; fix the failing build before re-review."
             state.needs_reflection = True
             status = MessageStatus.FAILED
 

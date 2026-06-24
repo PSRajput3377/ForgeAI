@@ -24,20 +24,14 @@ class EventStore:
 
     def timeline(self, run_id: str) -> list[Event]:
         """Ordered events for a run (the Agent Timeline / replay source)."""
-        return sorted(
-            (e for e in self._events if e.run_id == run_id), key=lambda e: e.tick
-        )
+        return sorted((e for e in self._events if e.run_id == run_id), key=lambda e: e.tick)
 
     def by_type(self, type_: EventType) -> list[Event]:
         return [e for e in self._events if e.type == type_]
 
     def audit_trail(self, run_id: str | None = None) -> list[dict]:
         """Flat, human-readable audit records (who → what → when)."""
-        events = (
-            self.timeline(run_id)
-            if run_id
-            else sorted(self._events, key=lambda e: e.tick)
-        )
+        events = self.timeline(run_id) if run_id else sorted(self._events, key=lambda e: e.tick)
         return [
             {
                 "tick": e.tick,

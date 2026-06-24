@@ -55,15 +55,11 @@ def _instrument(node_name: str, fn, bus):
     async def wrapped(state):
         loop = asyncio.get_event_loop()
         start = loop.time()
-        await bus.emit(
-            EventType.AGENT_STARTED, agent=node_name, run_id=state.project_id
-        )
+        await bus.emit(EventType.AGENT_STARTED, agent=node_name, run_id=state.project_id)
         try:
             result = await fn(state)
         except Exception:
-            await bus.emit(
-                EventType.AGENT_FAILED, agent=node_name, run_id=state.project_id
-            )
+            await bus.emit(EventType.AGENT_FAILED, agent=node_name, run_id=state.project_id)
             raise
         await bus.emit(
             EventType.AGENT_COMPLETED,

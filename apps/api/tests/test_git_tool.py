@@ -36,9 +36,7 @@ async def test_status_and_commit_flow(tmp_path):
     add = await git.execute(ToolInput(action="add", args={"paths": ["a.txt"]}))
     assert add.success
 
-    commit = await git.execute(
-        ToolInput(action="commit", args={"message": "feat: add a"})
-    )
+    commit = await git.execute(ToolInput(action="commit", args={"message": "feat: add a"}))
     assert commit.success
 
     log = await git.execute(ToolInput(action="log", args={"n": 1}))

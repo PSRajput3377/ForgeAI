@@ -108,10 +108,7 @@ class CircuitBreaker:
 
     def _on_failure(self) -> None:
         self._failures += 1
-        if (
-            self._failures >= self.failure_threshold
-            or self.state == CircuitState.HALF_OPEN
-        ):
+        if self._failures >= self.failure_threshold or self.state == CircuitState.HALF_OPEN:
             self.state = CircuitState.OPEN
             self._opened_at = self._clock()
 
@@ -131,9 +128,7 @@ class DeadLetterQueue:
 
     def add(self, job_id: str, payload: dict, error: str, attempts: int) -> None:
         self._entries.append(
-            DeadLetterEntry(
-                job_id=job_id, payload=payload, error=error, attempts=attempts
-            )
+            DeadLetterEntry(job_id=job_id, payload=payload, error=error, attempts=attempts)
         )
 
     def all(self) -> list[DeadLetterEntry]:

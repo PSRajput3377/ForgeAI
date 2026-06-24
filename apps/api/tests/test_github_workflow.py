@@ -40,9 +40,7 @@ async def test_happy_path_branch_pr_merge(repo):
     assert result.ci_status == CIStatus.SUCCESS
     assert result.review_approved
     assert result.merged
-    assert (
-        await provider.get_pull_request(repo, result.pr_number)
-    ).state == PRState.MERGED
+    assert (await provider.get_pull_request(repo, result.pr_number)).state == PRState.MERGED
     # Timeline reads like a junior engineer's workflow.
     joined = " | ".join(result.timeline)
     assert "Created branch feature/add-jwt-auth" in joined
@@ -95,9 +93,7 @@ async def test_ci_failure_self_corrects_then_merges(repo):
 async def test_ci_failure_without_fixer_stops_unmerged(repo):
     provider = FakeGitHubProvider()
     mgr = GitHubManager(provider)
-    provider.script_ci(
-        1, [CIStatus.FAILURE, CIStatus.FAILURE, CIStatus.FAILURE, CIStatus.FAILURE]
-    )
+    provider.script_ci(1, [CIStatus.FAILURE, CIStatus.FAILURE, CIStatus.FAILURE, CIStatus.FAILURE])
     result = await mgr.run_task(
         repo,
         kind="feature",

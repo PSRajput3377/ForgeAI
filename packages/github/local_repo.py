@@ -54,15 +54,11 @@ class LocalRepository:
     async def _git_checked(self, *args: str) -> str:
         code, out, err = await self._git(*args)
         if code != 0:
-            raise GitCommandError(
-                f"git {' '.join(args)} failed: {err.strip() or out.strip()}"
-            )
+            raise GitCommandError(f"git {' '.join(args)} failed: {err.strip() or out.strip()}")
         return out
 
     @classmethod
-    async def clone(
-        cls, url: str, dest: str | Path, *, depth: int | None = 1
-    ) -> LocalRepository:
+    async def clone(cls, url: str, dest: str | Path, *, depth: int | None = 1) -> LocalRepository:
         """Clone a repository (shallow by default) into ``dest``."""
         dest = Path(dest)
         args = ["clone"]
@@ -74,9 +70,7 @@ class LocalRepository:
         )
         _, err = await proc.communicate()
         if proc.returncode != 0:
-            raise GitCommandError(
-                f"clone failed: {err.decode(errors='replace').strip()}"
-            )
+            raise GitCommandError(f"clone failed: {err.decode(errors='replace').strip()}")
         return cls(dest)
 
     async def create_branch(self, name: str) -> None:
@@ -92,9 +86,7 @@ class LocalRepository:
             if not result.success:
                 raise GitCommandError(f"write {rel_path} failed: {result.error}")
 
-    async def commit_all(
-        self, branch: str, message: str, files: dict[str, str]
-    ) -> CommitResult:
+    async def commit_all(self, branch: str, message: str, files: dict[str, str]) -> CommitResult:
         """Write files, stage, and commit on ``branch``."""
         await self.write_files(files)
         await self._git_checked("add", "-A")

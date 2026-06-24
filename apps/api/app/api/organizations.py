@@ -57,11 +57,7 @@ async def _log(
     action: str,
     detail: str = "",
 ):
-    session.add(
-        Activity(
-            workspace_id=workspace_id, user_id=user_id, action=action, detail=detail
-        )
-    )
+    session.add(Activity(workspace_id=workspace_id, user_id=user_id, action=action, detail=detail))
 
 
 @router.post("", status_code=201)
@@ -94,9 +90,7 @@ async def create_workspace(
     if org is None:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Organization not found")
     if org.owner_id != user.id:
-        raise HTTPException(
-            status.HTTP_403_FORBIDDEN, "Only the org owner can add workspaces"
-        )
+        raise HTTPException(status.HTTP_403_FORBIDDEN, "Only the org owner can add workspaces")
     workspace = Workspace(organization_id=org_id, name=body.name)
     session.add(workspace)
     await session.flush()
@@ -132,9 +126,7 @@ async def accept_invite(
     user: User = Depends(current_user),
     session: AsyncSession = Depends(get_session),
 ) -> dict:
-    result = await session.execute(
-        select(Invitation).where(Invitation.token == body.token)
-    )
+    result = await session.execute(select(Invitation).where(Invitation.token == body.token))
     inv = result.scalar_one_or_none()
     if inv is None or inv.accepted:
         raise HTTPException(status.HTTP_404_NOT_FOUND, "Invalid or used invite")
@@ -151,9 +143,7 @@ async def accept_invite(
         )
     )
     if existing.scalar_one_or_none() is None:
-        session.add(
-            Membership(user_id=user.id, workspace_id=inv.workspace_id, role=inv.role)
-        )
+        session.add(Membership(user_id=user.id, workspace_id=inv.workspace_id, role=inv.role))
     inv.accepted = True
     await _log(session, inv.workspace_id, user.id, "member.joined", user.email)
     await session.commit()
@@ -189,9 +179,7 @@ async def activity(
     """Activity feed for a workspace (GitHub-style)."""
     await require_workspace_role(workspace_id, Role.VIEWER, user, session)
     result = await session.execute(
-        select(Activity)
-        .where(Activity.workspace_id == workspace_id)
-        .order_by(Activity.created_at)
+        select(Activity).where(Activity.workspace_id == workspace_id).order_by(Activity.created_at)
     )
     return {
         "activity": [

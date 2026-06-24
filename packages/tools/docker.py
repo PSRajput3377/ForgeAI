@@ -57,9 +57,7 @@ class DockerTool(Tool):
             return self._unknown_action(tool_input.action)
         command = tool_input.args.get("command")
         if not command:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, "Missing command"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, "Missing command")
 
         if not await self._docker_available():
             return ToolResult.fail(

@@ -42,7 +42,5 @@ async def test_instrumented_workflow_produces_timeline_and_metrics(echo_router):
 async def test_workflow_without_bus_still_runs(echo_router):
     # Backward compatible: no bus → no events, graph still completes.
     app = build_workflow(echo_router)
-    result = ProjectState.model_validate(
-        await app.ainvoke(ProjectState(user_request="x"))
-    )
+    result = ProjectState.model_validate(await app.ainvoke(ProjectState(user_request="x")))
     assert result.final_response

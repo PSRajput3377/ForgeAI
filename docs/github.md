@@ -215,9 +215,19 @@ curl -s -X POST localhost:8000/github/pr/<approval_id>/execute -H 'Content-Type:
 | Endpoint | Effect |
 |----------|--------|
 | `POST /github/pr/propose` | open approval request (no writes) |
+| `GET /github/pr/pending` | list pending proposals (Approval Center data) |
+| `GET /github/pr/{id}/diff` | proposed file contents (Diff Viewer) |
 | `POST /github/pr/{id}/approve` | approve a proposal |
 | `POST /github/pr/{id}/reject` | reject a proposal |
-| `POST /github/pr/{id}/execute` | create the PR (403 unless approved) |
+| `POST /github/pr/{id}/execute` | create the PR (403 unless approved; id-only) |
+
+### Approval Center UI (Phase 11)
+
+The **PR Approval Center** (`apps/web` `/workspace`) is the UI centerpiece:
+pending proposals from the agent pipeline, each with **Review** (inline diff
+viewer), **Approve** (one-click → executes the workflow → shows the PR URL), and
+**Reject**. The proposal's plan is stored server-side, so approve+execute needs
+only the `approval_id`. Nothing reaches GitHub without an explicit Approve.
 
 ## Live validation
 

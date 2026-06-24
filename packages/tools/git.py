@@ -80,9 +80,7 @@ class GitTool(Tool):
         try:
             code, out, err = await self._git(*argv)
         except KeyError as exc:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, f"Missing arg: {exc}"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, f"Missing arg: {exc}")
 
         if code != 0:
             return ToolResult(

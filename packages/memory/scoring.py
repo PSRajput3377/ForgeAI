@@ -45,9 +45,7 @@ def rank_memories(
     """Return items sorted by descending score, optionally truncated."""
     ranked = sorted(
         items,
-        key=lambda it: score_memory(
-            it, now_tick=now_tick, current_project_id=current_project_id
-        ),
+        key=lambda it: score_memory(it, now_tick=now_tick, current_project_id=current_project_id),
         reverse=True,
     )
     return ranked[:limit] if limit else ranked

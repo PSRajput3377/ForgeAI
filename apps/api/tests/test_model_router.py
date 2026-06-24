@@ -7,9 +7,7 @@ from models.base import Message
 
 @pytest.mark.asyncio
 async def test_router_uses_role_specific_model(echo_router):
-    resp = await echo_router.complete_for(
-        AgentRole.CODER, [Message(role="user", content="hello")]
-    )
+    resp = await echo_router.complete_for(AgentRole.CODER, [Message(role="user", content="hello")])
     assert resp.model == "echo-coder"
     assert "hello" in resp.content
 

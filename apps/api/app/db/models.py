@@ -93,9 +93,7 @@ class Membership(Base, TimestampMixin):
     """A user's role within a workspace (the RBAC join)."""
 
     __tablename__ = "memberships"
-    __table_args__ = (
-        UniqueConstraint("user_id", "workspace_id", name="uq_user_workspace"),
-    )
+    __table_args__ = (UniqueConstraint("user_id", "workspace_id", name="uq_user_workspace"),)
 
     id: Mapped[str] = mapped_column(String(32), primary_key=True, default=_uuid)
     user_id: Mapped[str] = mapped_column(ForeignKey("users.id"))
@@ -126,9 +124,7 @@ class Invitation(Base, TimestampMixin):
     workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id"))
     email: Mapped[str] = mapped_column(String(255))
     role: Mapped[Role] = mapped_column(String(16), default=Role.MEMBER)
-    token: Mapped[str] = mapped_column(
-        String(64), unique=True, index=True, default=_uuid
-    )
+    token: Mapped[str] = mapped_column(String(64), unique=True, index=True, default=_uuid)
     accepted: Mapped[bool] = mapped_column(default=False)
     expires_at: Mapped[datetime] = mapped_column(DateTime(timezone=True))
 
@@ -142,12 +138,8 @@ class Approval(Base, TimestampMixin):
     workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id"))
     action: Mapped[str] = mapped_column(String(64))
     requested_by: Mapped[str] = mapped_column(ForeignKey("users.id"))
-    approved_by: Mapped[str | None] = mapped_column(
-        ForeignKey("users.id"), nullable=True
-    )
-    status: Mapped[ApprovalStatus] = mapped_column(
-        String(16), default=ApprovalStatus.PENDING
-    )
+    approved_by: Mapped[str | None] = mapped_column(ForeignKey("users.id"), nullable=True)
+    status: Mapped[ApprovalStatus] = mapped_column(String(16), default=ApprovalStatus.PENDING)
 
 
 class Activity(Base, TimestampMixin):

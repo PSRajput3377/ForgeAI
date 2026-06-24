@@ -53,15 +53,11 @@ class GitHubManager:
         """Create a conventional task branch off the default branch."""
         return await self.branches.create_task_branch(repo, kind, task)
 
-    async def create_commit(
-        self, repo, branch: str, message: str, files: dict[str, str]
-    ):
+    async def create_commit(self, repo, branch: str, message: str, files: dict[str, str]):
         """Commit files to a branch."""
         return await self.commits.commit(repo, branch, message, files)
 
-    async def create_pr(
-        self, repo, *, title, summary, changes, testing, head, base=None
-    ):
+    async def create_pr(self, repo, *, title, summary, changes, testing, head, base=None):
         """Open a pull request with a structured body. Returns the PullRequest."""
         return await self.prs.open(
             repo,
@@ -152,11 +148,7 @@ class GitHubManager:
             timeline.append("CI passed")
 
         merged = False
-        if (
-            auto_merge
-            and ci_status == CIStatus.SUCCESS
-            and (reviewer is None or review_approved)
-        ):
+        if auto_merge and ci_status == CIStatus.SUCCESS and (reviewer is None or review_approved):
             await self.prs.merge(repo, pr.number)
             merged = True
             timeline.append(f"Merged PR #{pr.number}")

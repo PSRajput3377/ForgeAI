@@ -23,9 +23,7 @@ async def test_filesystem_write_read_under_budget(tmp_path):
             ToolInput(action="write", args={"path": f"f{i}.txt", "content": "x" * 100}),
         )
     for i in range(100):
-        await mgr.run(
-            "filesystem", ToolInput(action="read", args={"path": f"f{i}.txt"})
-        )
+        await mgr.run("filesystem", ToolInput(action="read", args={"path": f"f{i}.txt"}))
     elapsed = time.perf_counter() - start
     # 200 confined fs ops should be fast; 5s is a very generous ceiling.
     assert elapsed < 5.0, f"200 fs ops took {elapsed:.2f}s"

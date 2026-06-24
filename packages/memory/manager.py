@@ -58,11 +58,7 @@ class MemoryManager:
             importance=importance,
             created_tick=tick,
             last_used_tick=tick,
-            **{
-                k: v
-                for k, v in owner.items()
-                if k in {"session_id", "project_id", "user_id"}
-            },
+            **{k: v for k, v in owner.items() if k in {"session_id", "project_id", "user_id"}},
         )
         await self.store.put(item)
         return item

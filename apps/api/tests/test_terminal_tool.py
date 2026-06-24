@@ -46,9 +46,7 @@ async def test_command_not_on_allowlist(tmp_path):
 async def test_timeout_kills_process(tmp_path):
     term = TerminalTool(tmp_path)
     # python is allowlisted; sleep longer than the timeout.
-    res = await term.execute(
-        inp('python3 -c "import time; time.sleep(5)"', timeout=0.3)
-    )
+    res = await term.execute(inp('python3 -c "import time; time.sleep(5)"', timeout=0.3))
     assert not res.success
     assert res.error.code == ToolErrorCode.TIMEOUT
     assert res.error.retryable

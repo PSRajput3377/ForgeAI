@@ -38,9 +38,7 @@ class ClassifiedError(BaseModel):
 _RULES: list[tuple[ErrorCategory, re.Pattern, str, str]] = [
     (
         ErrorCategory.DEPENDENCY,
-        re.compile(
-            r"(?:ModuleNotFoundError|ImportError)[^'\"]*['\"](?P<mod>[\w\-\.]+)['\"]"
-        ),
+        re.compile(r"(?:ModuleNotFoundError|ImportError)[^'\"]*['\"](?P<mod>[\w\-\.]+)['\"]"),
         "mod",
         "Add the missing dependency and reinstall, then retry.",
     ),
@@ -70,14 +68,10 @@ _RULES: list[tuple[ErrorCategory, re.Pattern, str, str]] = [
     ),
 ]
 
-_SECURITY_RE = re.compile(
-    r"(secret|api[_-]?key|password|token)\s*[:=]\s*\S+", re.IGNORECASE
-)
+_SECURITY_RE = re.compile(r"(secret|api[_-]?key|password|token)\s*[:=]\s*\S+", re.IGNORECASE)
 
 
-def classify_error(
-    stderr: str, stdout: str = "", *, timed_out: bool = False
-) -> ClassifiedError:
+def classify_error(stderr: str, stdout: str = "", *, timed_out: bool = False) -> ClassifiedError:
     """Classify a failure from its logs."""
     if timed_out:
         return ClassifiedError(

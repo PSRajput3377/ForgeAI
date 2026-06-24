@@ -38,17 +38,11 @@ async def test_unknown_tool(tmp_path):
 @pytest.mark.asyncio
 async def test_permission_denied_for_delete_by_default(tmp_path):
     mgr, sink = make_manager(tmp_path)  # default grants exclude DELETE
-    await mgr.run(
-        "filesystem", ToolInput(action="write", args={"path": "a.txt", "content": "x"})
-    )
-    res = await mgr.run(
-        "filesystem", ToolInput(action="delete", args={"path": "a.txt"})
-    )
+    await mgr.run("filesystem", ToolInput(action="write", args={"path": "a.txt", "content": "x"}))
+    res = await mgr.run("filesystem", ToolInput(action="delete", args={"path": "a.txt"}))
     assert not res.success and res.error.code == ToolErrorCode.PERMISSION_DENIED
     # File still exists because delete was blocked before execution.
-    exists = await mgr.run(
-        "filesystem", ToolInput(action="exists", args={"path": "a.txt"})
-    )
+    exists = await mgr.run("filesystem", ToolInput(action="exists", args={"path": "a.txt"}))
     assert exists.metadata["exists"] is True
 
 
@@ -56,10 +50,6 @@ async def test_permission_denied_for_delete_by_default(tmp_path):
 async def test_delete_allowed_when_granted(tmp_path):
     granted = {Permission.READ, Permission.WRITE, Permission.DELETE}
     mgr, _ = make_manager(tmp_path, granted=granted)
-    await mgr.run(
-        "filesystem", ToolInput(action="write", args={"path": "a.txt", "content": "x"})
-    )
-    res = await mgr.run(
-        "filesystem", ToolInput(action="delete", args={"path": "a.txt"})
-    )
+    await mgr.run("filesystem", ToolInput(action="write", args={"path": "a.txt", "content": "x"}))
+    res = await mgr.run("filesystem", ToolInput(action="delete", args={"path": "a.txt"}))
     assert res.success

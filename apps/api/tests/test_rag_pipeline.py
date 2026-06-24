@@ -17,8 +17,7 @@ def _make_project(root):
     )
     (root / "ui").mkdir()
     (root / "ui" / "navbar.css").write_text(
-        ".navbar { color: blue; background: white; }\n"
-        "/* dashboard styling and colors */\n"
+        ".navbar { color: blue; background: white; }\n" "/* dashboard styling and colors */\n"
     )
     (root / "README.md").write_text("# Demo project\nUses FastAPI and JWT auth.\n")
     # Noise that must be ignored.
@@ -48,9 +47,7 @@ async def test_semantic_retrieval_finds_by_meaning(tmp_path):
     embedder, store, _, _ = await _index(tmp_path)
     retriever = Retriever(embedder, store)
     # Query by *meaning*, not filename.
-    hits = await retriever.retrieve(
-        "where do we validate the JWT authentication?", limit=1
-    )
+    hits = await retriever.retrieve("where do we validate the JWT authentication?", limit=1)
     assert hits[0].metadata["file"] == "auth/middleware.py"
 
 

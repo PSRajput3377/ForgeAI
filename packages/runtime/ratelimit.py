@@ -13,9 +13,7 @@ from collections.abc import Callable
 class TokenBucket:
     """Classic token bucket: ``rate`` tokens/sec up to ``capacity``."""
 
-    def __init__(
-        self, rate: float, capacity: float, clock: Callable[[], float] = lambda: 0.0
-    ):
+    def __init__(self, rate: float, capacity: float, clock: Callable[[], float] = lambda: 0.0):
         self.rate = rate
         self.capacity = capacity
         self._clock = clock
@@ -39,9 +37,7 @@ class TokenBucket:
 class RateLimiter:
     """Per-key token buckets (e.g. one per user or org)."""
 
-    def __init__(
-        self, rate: float, capacity: float, clock: Callable[[], float] = lambda: 0.0
-    ):
+    def __init__(self, rate: float, capacity: float, clock: Callable[[], float] = lambda: 0.0):
         self.rate = rate
         self.capacity = capacity
         self._clock = clock

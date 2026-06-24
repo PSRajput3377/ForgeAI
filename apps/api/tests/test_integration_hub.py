@@ -36,9 +36,7 @@ async def test_register_and_list_systems():
 async def test_permission_blocks_unauthorized_agent():
     perms = ConnectorPermissions()
     perms.grant("notification", System.SLACK, Capability.WRITE)
-    hub = IntegrationHub(
-        permissions=perms, approval_rules=ApprovalRules(required=set())
-    )
+    hub = IntegrationHub(permissions=perms, approval_rules=ApprovalRules(required=set()))
     hub.register(FakeSlackConnector())
 
     # Authorized agent can post.
@@ -87,15 +85,11 @@ async def test_non_gated_write_skips_approval():
 @pytest.mark.asyncio
 async def test_cross_system_search():
     hub = build_hub()
-    await hub.connector(System.JIRA).create(
-        "issue", title="Add JWT auth", body="use jwt"
-    )
+    await hub.connector(System.JIRA).create("issue", title="Add JWT auth", body="use jwt")
     await hub.connector(System.NOTION).create(
         "page", title="Auth RFC", body="JWT chosen for statelessness"
     )
-    await hub.connector(System.SLACK).create(
-        "message", body="why jwt? because stateless"
-    )
+    await hub.connector(System.SLACK).create("message", body="why jwt? because stateless")
 
     results = await hub.search("jwt")
     systems = {r.system for r in results}

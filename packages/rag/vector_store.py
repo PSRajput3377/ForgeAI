@@ -109,9 +109,7 @@ class QdrantVectorStore(VectorStore):
             if self.collection not in existing:
                 self._client.create_collection(
                     self.collection,
-                    vectors_config=VectorParams(
-                        size=self.dim, distance=Distance.COSINE
-                    ),
+                    vectors_config=VectorParams(size=self.dim, distance=Distance.COSINE),
                 )
         return self._client
 
@@ -120,9 +118,7 @@ class QdrantVectorStore(VectorStore):
 
         client = self._ensure_client()
         points = [
-            PointStruct(
-                id=r.id, vector=r.vector, payload={"text": r.text, **r.metadata}
-            )
+            PointStruct(id=r.id, vector=r.vector, payload={"text": r.text, **r.metadata})
             for r in records
         ]
         client.upsert(self.collection, points=points)
@@ -134,18 +130,14 @@ class QdrantVectorStore(VectorStore):
         for p in results:
             payload = dict(p.payload or {})
             text = payload.pop("text", "")
-            hits.append(
-                SearchHit(id=str(p.id), score=p.score, text=text, metadata=payload)
-            )
+            hits.append(SearchHit(id=str(p.id), score=p.score, text=text, metadata=payload))
         return hits
 
     async def delete_by_filter(self, **equals: str) -> int:
         from qdrant_client.models import FieldCondition, Filter, MatchValue
 
         client = self._ensure_client()
-        conditions = [
-            FieldCondition(key=k, match=MatchValue(value=v)) for k, v in equals.items()
-        ]
+        conditions = [FieldCondition(key=k, match=MatchValue(value=v)) for k, v in equals.items()]
         client.delete(self.collection, points_selector=Filter(must=conditions))
         return 0  # Qdrant delete is fire-and-forget; count not returned
 

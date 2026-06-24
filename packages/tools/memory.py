@@ -37,14 +37,10 @@ class MemoryTool(Tool):
         try:
             match action:
                 case "store" | "update":
-                    self._bucket(args.get("type", "conversation"))[args["key"]] = args[
-                        "value"
-                    ]
+                    self._bucket(args.get("type", "conversation"))[args["key"]] = args["value"]
                     return ToolResult.ok(self.name)
                 case "retrieve":
-                    val = self._bucket(args.get("type", "conversation")).get(
-                        args["key"]
-                    )
+                    val = self._bucket(args.get("type", "conversation")).get(args["key"])
                     if val is None:
                         return ToolResult.fail(
                             self.name,
@@ -53,18 +49,14 @@ class MemoryTool(Tool):
                         )
                     return ToolResult.ok(self.name, output=val)
                 case "delete":
-                    self._bucket(args.get("type", "conversation")).pop(
-                        args["key"], None
-                    )
+                    self._bucket(args.get("type", "conversation")).pop(args["key"], None)
                     return ToolResult.ok(self.name)
                 case "search":
                     return self._search(args["query"], args.get("type"))
                 case _:
                     return self._unknown_action(action)
         except KeyError as exc:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, f"Missing arg: {exc}"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, f"Missing arg: {exc}")
 
     def _search(self, query: str, mtype: str | None) -> ToolResult:
         types = [mtype] if mtype else list(self._store)

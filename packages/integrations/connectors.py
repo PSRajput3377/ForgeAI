@@ -50,9 +50,7 @@ class FakeJiraConnector(_InMemoryConnector):
 
     _counter = 0
 
-    async def create(
-        self, kind: str, *, title: str, body: str = "", **fields
-    ) -> ExternalObject:
+    async def create(self, kind: str, *, title: str, body: str = "", **fields) -> ExternalObject:
         self._counter += 1
         key = f"JIRA-{100 + self._counter}"
         return self.seed(
@@ -95,9 +93,7 @@ class FakeNotionConnector(_InMemoryConnector):
     system = System.NOTION
     capabilities = {Capability.READ, Capability.WRITE}
 
-    async def create(
-        self, kind: str, *, title: str, body: str = "", **fields
-    ) -> ExternalObject:
+    async def create(self, kind: str, *, title: str, body: str = "", **fields) -> ExternalObject:
         ref = f"notion:{title.lower().replace(' ', '-')}"
         return self.seed(
             ExternalObject(
@@ -110,9 +106,7 @@ class FakeNotionConnector(_InMemoryConnector):
             )
         )
 
-    async def update(
-        self, ref: str, *, body: str | None = None, **fields
-    ) -> ExternalObject:
+    async def update(self, ref: str, *, body: str | None = None, **fields) -> ExternalObject:
         obj = self._objects[ref]
         if body is not None:
             obj.body = body

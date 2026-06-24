@@ -55,9 +55,7 @@ class FilesystemTool(Tool):
                 case "list":
                     return self._list(args.get("path", "."))
                 case "exists":
-                    return ToolResult.ok(
-                        self.name, exists=self._resolve(args["path"]).exists()
-                    )
+                    return ToolResult.ok(self.name, exists=self._resolve(args["path"]).exists())
                 case "search":
                     return self._search(args["query"], args.get("path", "."))
                 case "delete":
@@ -67,9 +65,7 @@ class FilesystemTool(Tool):
                 case _:
                     return self._unknown_action(action)
         except KeyError as exc:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, f"Missing arg: {exc}"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, f"Missing arg: {exc}")
         except PermissionError as exc:
             return ToolResult.fail(
                 self.name, ToolErrorCode.PATH_ESCAPE, f"Path escapes workspace: {exc}"
@@ -78,9 +74,7 @@ class FilesystemTool(Tool):
     def _read(self, path: str) -> ToolResult:
         target = self._resolve(path)
         if not target.is_file():
-            return ToolResult.fail(
-                self.name, ToolErrorCode.FILE_NOT_FOUND, f"Not a file: {path}"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.FILE_NOT_FOUND, f"Not a file: {path}")
         return ToolResult.ok(self.name, output=target.read_text(encoding="utf-8"))
 
     def _write(self, path: str, content: str) -> ToolResult:
@@ -92,23 +86,17 @@ class FilesystemTool(Tool):
     def _patch(self, path: str, find: str, replace: str) -> ToolResult:
         target = self._resolve(path)
         if not target.is_file():
-            return ToolResult.fail(
-                self.name, ToolErrorCode.FILE_NOT_FOUND, f"Not a file: {path}"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.FILE_NOT_FOUND, f"Not a file: {path}")
         text = target.read_text(encoding="utf-8")
         if find not in text:
-            return ToolResult.fail(
-                self.name, ToolErrorCode.INVALID_INPUT, "find text not present"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.INVALID_INPUT, "find text not present")
         target.write_text(text.replace(find, replace), encoding="utf-8")
         return ToolResult.ok(self.name, replacements=text.count(find))
 
     def _list(self, path: str) -> ToolResult:
         target = self._resolve(path)
         if not target.is_dir():
-            return ToolResult.fail(
-                self.name, ToolErrorCode.NOT_FOUND, f"Not a directory: {path}"
-            )
+            return ToolResult.fail(self.name, ToolErrorCode.NOT_FOUND, f"Not a directory: {path}")
         entries = sorted(p.relative_to(self.root).as_posix() for p in target.iterdir())
         return ToolResult.ok(self.name, entries=entries)
 

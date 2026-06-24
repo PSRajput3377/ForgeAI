@@ -28,11 +28,7 @@ class TestingAgent(BaseAgent):
             AgentMessage(
                 task_id=task_id,
                 sender=self.role,
-                status=(
-                    MessageStatus.COMPLETED
-                    if state.test_passed
-                    else MessageStatus.FAILED
-                ),
+                status=(MessageStatus.COMPLETED if state.test_passed else MessageStatus.FAILED),
                 summary="Ran tests",
                 payload={"passed": state.test_passed},
             )
