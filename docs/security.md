@@ -20,8 +20,10 @@ manipulated via prompt injection in project files.
 3. **Validate every file path.** The Filesystem tool resolves paths against a
    project `root` and rejects anything that escapes it (no `../` traversal,
    no absolute paths outside root). Enforced and tested today.
-4. **Restrict destructive operations.** File **delete** and **rename** are not
-   exposed to agents in the MVP. Writes are confined to the project root.
+4. **Restrict destructive operations.** File **delete**, **rename**, **git
+   push**, and **network** access require permissions the Tool Manager does
+   **not** grant by default — they are opt-in per run. Default grants are
+   `READ, WRITE, EXECUTE, COMMIT`. Writes are confined to the project root.
 5. **Least privilege for tools.** Each tool declares and is limited to its
    scope ([tools.md](tools.md)). The Git tool cannot touch the filesystem
    outside the repo; the DB tool uses scoped, parameterized queries.
@@ -50,10 +52,13 @@ manipulated via prompt injection in project files.
 | Control                         | Status                         |
 |---------------------------------|--------------------------------|
 | Path validation / sandboxed FS  | ✅ implemented + tested        |
-| Delete/rename withheld          | ✅ (not exposed)               |
-| Docker execution sandbox        | 🔜 Docker Sandbox phase        |
+| Permission system (least-priv)  | ✅ implemented + tested        |
+| Delete/rename/push/network gated| ✅ opt-in permissions          |
+| Command allowlist + timeout     | ✅ implemented + tested        |
+| Structured errors               | ✅ implemented + tested        |
+| Docker execution sandbox        | 🟡 tool ready; daemon-gated    |
+| Network-restricted containers   | ✅ `--network none` in DockerTool |
 | JWT auth + rate limiting        | 🔜 Authentication phase        |
-| Network-restricted containers   | 🔜 Docker Sandbox phase        |
 
 Formal requirements: this doc is the policy; per-component enforcement is
 checked against the specs in [`../specs/`](../specs/).

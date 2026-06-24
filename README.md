@@ -45,7 +45,8 @@ The project is being built in 12 phases. See the
 | 0     | Product Design               | ✅ Complete    |
 | 1     | Project Setup                | ✅ Complete    |
 | 2     | AI Engine & Agent Architecture | ✅ Complete  |
-| 3     | Tool System                  | ⬜ Not started |
+| 2.5   | System Design & Documentation | ✅ Complete   |
+| 3     | Tool System & Action Engine  | ✅ Complete    |
 | 4     | Memory + RAG                 | ⬜ Not started |
 | 5     | Docker Sandbox               | ⬜ Not started |
 | 6     | GitHub Integration           | ⬜ Not started |
