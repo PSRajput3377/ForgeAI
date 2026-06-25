@@ -17,11 +17,10 @@ import {
   type Project,
   type Starter,
 } from "@/lib/api";
-import { useAppStore } from "@/store/useAppStore";
-import { useAuthStore } from "@/store/useAuthStore";
+import { useAppStore, useHydratedStore } from "@/store/useAppStore";
 
 export default function ProjectsPage() {
-  const accessToken = useAuthStore((s) => s.accessToken);
+  const hydrated = useHydratedStore();
   const workspaceId = useAppStore((s) => s.workspaceId);
   const setWorkspaceId = useAppStore((s) => s.setWorkspaceId);
   const setActiveProject = useAppStore((s) => s.setActiveProject);
@@ -35,7 +34,10 @@ export default function ProjectsPage() {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!accessToken) {
+    if (!hydrated) return; // wait for localStorage-backed state
+    const token =
+      typeof window !== "undefined" ? window.localStorage.getItem("forge.access") : null;
+    if (!token) {
       window.location.href = "/login";
       return;
     }
@@ -49,7 +51,7 @@ export default function ProjectsPage() {
       setStarters(await listStarters());
       setReady(true);
     })();
-  }, [accessToken, workspaceId, setWorkspaceId]);
+  }, [hydrated, workspaceId, setWorkspaceId]);
 
   function open(p: Project) {
     setActiveProject(p.id, p.name);

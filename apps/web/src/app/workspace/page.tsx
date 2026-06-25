@@ -15,17 +15,18 @@ import { AgentTimeline } from "@/components/AgentTimeline";
 import { ApprovalCenter } from "@/components/ApprovalCenter";
 import { MetricsPanel } from "@/components/MetricsPanel";
 import { TaskInput } from "@/components/TaskInput";
-import { useAppStore } from "@/store/useAppStore";
+import { useAppStore, useHydratedStore } from "@/store/useAppStore";
 
 export default function WorkspacePage() {
   const { events, status } = useEventStream();
+  const hydrated = useHydratedStore();
   const projectId = useAppStore((s) => s.activeProjectId);
   const projectName = useAppStore((s) => s.activeProjectName);
 
-  // No project selected → send the user to the chooser (the front door).
+  // Once hydrated from localStorage, if there's no project, go to the chooser.
   useEffect(() => {
-    if (!projectId) window.location.href = "/projects";
-  }, [projectId]);
+    if (hydrated && !projectId) window.location.href = "/projects";
+  }, [hydrated, projectId]);
 
   const live = status === "open";
   return (
