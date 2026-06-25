@@ -235,3 +235,9 @@ action (§8), never automatic.
       interfaces with safe defaults and approval gates; none auto-acts on
       production without meeting a documented data threshold.
 - [x] `pr_accepted` backfill seam exists end-to-end (field + writer).
+
+**Marketplace / plugin system (independent):**
+
+- [x] Agents register as metadata-only descriptors (no code runs on register),
+      registration is approval-gated, discovery returns only approved agents,
+      and a contract check rejects agents that violate `agent-spec.md`.
