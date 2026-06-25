@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
     qdrant_url: str = "http://localhost:6333"
     ollama_url: str = "http://localhost:11434"
+    ollama_timeout: float = 600.0  # seconds; raise on slow/local hardware
 
     # Auth
     jwt_secret: str = "change-me-in-production"
@@ -37,8 +38,15 @@ class Settings(BaseSettings):
     github_token: str = ""
     github_api_url: str = "https://api.github.com"
     github_webhook_secret: str = ""  # HMAC secret for webhook verification
+    github_owner: str = ""  # e.g. PSRajput3377 — enables auto PR proposals after agent runs
+    github_repo: str = ""  # e.g. forge-demo-fastapi-
+    git_author_name: str = "ForgeAI"
+    git_author_email: str = "forgeai@users.noreply.github.com"
 
     # Model routing (Ollama, local)
+    # Provider: "ollama" (real local models) or "echo" (deterministic, instant —
+    # for demos/CI on hardware that can't run the models). ADR-0003.
+    model_provider: str = "ollama"
     model_planner: str = "qwen3:8b"
     model_coder: str = "deepseek-coder"
     model_research: str = "llama3.1:8b"

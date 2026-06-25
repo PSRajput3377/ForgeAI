@@ -8,11 +8,12 @@ one. All offline.
 
 import pytest
 import pytest_asyncio
-from app.db.base import Base
-from app.failure_kb import FailureKB
 from core.state import ProjectState
 from failures import FailureStore, Outcome, error_signature
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from app.db.base import Base
+from app.failure_kb import FailureKB
 
 # --- signature normalization ------------------------------------------------
 

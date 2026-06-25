@@ -2,7 +2,9 @@
 # the host's Python. Uses uv for fast, reproducible installs.
 FROM python:3.12-slim
 
-# Install uv (static binary).
+# Install uv (static binary) and git (local clone → commit → push for live GitHub).
+RUN apt-get update && apt-get install -y --no-install-recommends git \
+    && rm -rf /var/lib/apt/lists/*
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 ENV PYTHONUNBUFFERED=1 \

@@ -7,8 +7,6 @@ auto-acts on thin data. All offline.
 
 import pytest
 import pytest_asyncio
-from app.db.base import Base
-from app.performance import PerformanceStore
 from evaluation import Evaluation
 from evaluation.stats import Stats
 from learning import (
@@ -19,6 +17,9 @@ from learning import (
     suggest_skips,
 )
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from app.db.base import Base
+from app.performance import PerformanceStore
 
 
 def _stats(runs, mean_score, success_rate=1.0) -> Stats:

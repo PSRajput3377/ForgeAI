@@ -18,7 +18,9 @@ export interface RunResult {
   review_verdict: string;
   tasks: number;
   files_changed: string[];
+  generated_files: Record<string, string>;
   retries: number;
+  pr_approval_id?: string | null;
 }
 
 /** Kick off the multi-agent workflow for a task. Resolves when the run finishes;
@@ -120,7 +122,11 @@ async function prAction(approvalId: string, action: string) {
   const res = await fetch(`${API_URL}/github/pr/${approvalId}/${action}`, {
     method: "POST",
   });
-  if (!res.ok) throw new Error((await res.json()).detail ?? `${action} failed`);
+  if (!res.ok) {
+    const body = await res.json().catch(() => ({}));
+    const detail = typeof body.detail === "string" ? body.detail : undefined;
+    throw new Error(detail ?? `${action} failed (${res.status})`);
+  }
   return res.json();
 }
 

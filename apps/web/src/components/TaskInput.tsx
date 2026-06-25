@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { GeneratedFiles } from "@/components/GeneratedFiles";
 import { runAgents, type RunResult } from "@/lib/api";
 
 /**
@@ -85,6 +86,21 @@ export function TaskInput() {
           {result.final_response && (
             <p className="mt-1 whitespace-pre-wrap text-neutral-400">{result.final_response}</p>
           )}
+          {result.pr_approval_id && (
+            <p className="mt-2 text-green-400">
+              PR proposed — open <span className="text-neutral-500">Pending Approvals</span>{" "}
+              to review and execute.
+            </p>
+          )}
+        </div>
+      )}
+
+      {result && Object.keys(result.generated_files ?? {}).length > 0 && (
+        <div className="rounded-lg border border-neutral-800 p-4">
+          <h3 className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
+            Generated code
+          </h3>
+          <GeneratedFiles files={result.generated_files} />
         </div>
       )}
     </div>

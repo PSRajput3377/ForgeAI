@@ -32,9 +32,17 @@ class CommitResult(BaseModel):
 class LocalRepository:
     """A local git working copy ForgeAI commits to and pushes from."""
 
-    def __init__(self, path: str | Path):
+    def __init__(
+        self,
+        path: str | Path,
+        *,
+        author_name: str = "ForgeAI",
+        author_email: str = "forgeai@users.noreply.github.com",
+    ):
         self.path = Path(path).resolve()
         self.fs = FilesystemTool(self.path)
+        self.author_name = author_name
+        self.author_email = author_email
 
     async def _git(self, *args: str) -> tuple[int, str, str]:
         proc = await asyncio.create_subprocess_exec(
@@ -58,7 +66,15 @@ class LocalRepository:
         return out
 
     @classmethod
-    async def clone(cls, url: str, dest: str | Path, *, depth: int | None = 1) -> LocalRepository:
+    async def clone(
+        cls,
+        url: str,
+        dest: str | Path,
+        *,
+        depth: int | None = 1,
+        author_name: str = "ForgeAI",
+        author_email: str = "forgeai@users.noreply.github.com",
+    ) -> LocalRepository:
         """Clone a repository (shallow by default) into ``dest``."""
         dest = Path(dest)
         args = ["clone"]
@@ -71,7 +87,7 @@ class LocalRepository:
         _, err = await proc.communicate()
         if proc.returncode != 0:
             raise GitCommandError(f"clone failed: {err.decode(errors='replace').strip()}")
-        return cls(dest)
+        return cls(dest, author_name=author_name, author_email=author_email)
 
     async def create_branch(self, name: str) -> None:
         """Create and switch to a new branch (never works on the default branch)."""
@@ -90,7 +106,15 @@ class LocalRepository:
         """Write files, stage, and commit on ``branch``."""
         await self.write_files(files)
         await self._git_checked("add", "-A")
-        await self._git_checked("commit", "-m", message)
+        await self._git_checked(
+            "-c",
+            f"user.email={self.author_email}",
+            "-c",
+            f"user.name={self.author_name}",
+            "commit",
+            "-m",
+            message,
+        )
         return CommitResult(branch=branch, message=message)
 
     async def push(self, branch: str, *, remote: str = "origin") -> None:

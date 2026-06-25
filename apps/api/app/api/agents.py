@@ -12,13 +12,18 @@ from __future__ import annotations
 
 from evaluation import EvaluationStore
 from fastapi import APIRouter, Depends
+from observability.events import EventType
 from prompts import active_versions
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.agents_runtime import run_request
+from app.config import settings
 from app.db.base import get_session
+from app.github_propose import persist_agent_pr_proposal
+from app.observability_runtime import observability
 from app.performance import PerformanceStore
+from app.pr_approvals import PRApprovalStore
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -34,7 +39,9 @@ class RunResponse(BaseModel):
     review_verdict: str
     tasks: int
     files_changed: list[str]
+    generated_files: dict[str, str]
     retries: int
+    pr_approval_id: str | None = None
 
 
 @router.post("/run", response_model=RunResponse)
@@ -45,12 +52,44 @@ async def run(body: RunRequest, session: AsyncSession = Depends(get_session)) ->
     Performance Database (12.2), so the Agent Analytics dashboard reflects it.
     """
     eval_store = EvaluationStore()
-    state = await run_request(
+    state, github_collector = await run_request(
         body.user_request,
         project_id=body.project_id,
         project_path=body.project_path,
         evaluation_store=eval_store,
     )
+
+    pr_approval_id: str | None = None
+    if github_collector and github_collector.collected:
+        try:
+            row = await PRApprovalStore(session).create(
+                settings.github_owner,
+                settings.github_repo,
+                github_collector.collected,
+            )
+            pr_approval_id = row.id
+            await observability.bus.emit(
+                EventType.APPROVAL_REQUESTED,
+                run_id=state.project_id,
+                payload={
+                    "approval_id": pr_approval_id,
+                    "action": "create_pr",
+                    "title": github_collector.collected.pr_title,
+                },
+            )
+        except Exception:  # noqa: BLE001
+            try:
+                await session.rollback()
+            except Exception:  # noqa: BLE001
+                pass
+    else:
+        try:
+            pr_approval_id = await persist_agent_pr_proposal(session, state)
+        except Exception:  # noqa: BLE001
+            try:
+                await session.rollback()
+            except Exception:  # noqa: BLE001
+                pass
 
     # Persist the scored evaluation (best-effort; a run still succeeds even if
     # the analytics write fails — e.g. no DB configured).
@@ -72,5 +111,7 @@ async def run(body: RunRequest, session: AsyncSession = Depends(get_session)) ->
         review_verdict=state.review_verdict.value,
         tasks=len(state.tasks),
         files_changed=sorted(state.generated_code.keys()),
+        generated_files=dict(state.generated_code),
         retries=state.retry_count,
+        pr_approval_id=pr_approval_id,
     )

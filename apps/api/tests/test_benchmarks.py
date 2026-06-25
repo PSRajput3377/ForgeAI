@@ -7,11 +7,12 @@ scenarios through the real workflow (echo provider here) and emits per-scenario
 
 import pytest
 import pytest_asyncio
-from app.benchmark_store import BenchmarkStore
-from app.db.base import Base
 from benchmarks import SUITE, SUITE_VERSION, Scenario, run_benchmarks
 from benchmarks.suite import Category
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+from app.benchmark_store import BenchmarkStore
+from app.db.base import Base
 
 # --- suite integrity --------------------------------------------------------
 

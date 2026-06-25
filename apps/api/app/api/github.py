@@ -7,6 +7,7 @@ repo you point it at, so use a sandbox.
 
 from __future__ import annotations
 
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from github.manager import GitHubManager
 from github.workflow import PRPlan
@@ -15,6 +16,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.base import get_session
 from app.db.models import ApprovalStatus, PRApproval
+from app.github_execute import execute_live_pr, github_error_message
 from app.github_runtime import build_provider, github_configured
 from app.pr_approvals import PRApprovalStore
 
@@ -181,6 +183,8 @@ async def reject_pr(approval_id: str, session: AsyncSession = Depends(get_sessio
 @router.post("/pr/{approval_id}/execute")
 async def execute_pr(approval_id: str, session: AsyncSession = Depends(get_session)) -> dict:
     """One-click: create the PR from the stored plan — only if approved."""
+    from app.config import settings
+
     store = PRApprovalStore(session)
     row = await store.get(approval_id)
     if row is None:
@@ -188,20 +192,36 @@ async def execute_pr(approval_id: str, session: AsyncSession = Depends(get_sessi
     if ApprovalStatus(row.status) != ApprovalStatus.APPROVED:
         raise HTTPException(403, f"Not approved (status={row.status}); refusing to write")
 
-    manager = GitHubManager(build_provider())
-    repo = await build_provider().get_repository(row.owner, row.name)
     plan = PRApprovalStore.plan_of(row)
 
-    branch = await manager.create_branch(repo, plan.kind, plan.task)
-    await manager.create_commit(repo, branch.name, plan.commit_message, plan.files)
-    pr = await manager.create_pr(
-        repo,
-        title=plan.pr_title,
-        summary=plan.pr_summary,
-        changes=plan.changes,
-        testing=plan.testing,
-        head=branch.name,
-    )
-    url = f"https://github.com/{repo.full_name}/pull/{pr.number}"
+    try:
+        if github_configured():
+            provider = build_provider()
+            repo = await provider.get_repository(row.owner, row.name)
+            branch, pr = await execute_live_pr(
+                repo,
+                plan,
+                settings.github_token,
+                author_name=settings.git_author_name,
+                author_email=settings.git_author_email,
+            )
+        else:
+            manager = GitHubManager(build_provider())
+            repo = await build_provider().get_repository(row.owner, row.name)
+            branch = await manager.create_branch(repo, plan.kind, plan.task)
+            await manager.create_commit(repo, branch.name, plan.commit_message, plan.files)
+            pr = await manager.create_pr(
+                repo,
+                title=plan.pr_title,
+                summary=plan.pr_summary,
+                changes=plan.changes,
+                testing=plan.testing,
+                head=branch.name,
+            )
+            branch = branch.name
+    except (httpx.HTTPError, RuntimeError, NotImplementedError) as exc:
+        raise HTTPException(502, github_error_message(exc)) from exc
+
+    url = f"https://github.com/{row.owner}/{row.name}/pull/{pr.number}"
     await store.set_pr_url(approval_id, url)
-    return {"approved": True, "branch": branch.name, "pr_number": pr.number, "pr_url": url}
+    return {"approved": True, "branch": branch, "pr_number": pr.number, "pr_url": url}
