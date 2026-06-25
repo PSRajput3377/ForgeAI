@@ -231,7 +231,7 @@ action (§8), never automatic.
 
 **Learning loops (scaffolded in Phase 12, enabled post-data):**
 
-- [ ] A/B promotion, workflow optimization, and PR-outcome learning exist as
+- [x] A/B promotion, workflow optimization, and PR-outcome learning exist as
       interfaces with safe defaults and approval gates; none auto-acts on
       production without meeting a documented data threshold.
-- [ ] `pr_accepted` backfill seam exists end-to-end (field + writer).
+- [x] `pr_accepted` backfill seam exists end-to-end (field + writer).
