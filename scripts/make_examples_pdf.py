@@ -273,7 +273,7 @@ def cover_page(canvas, doc):
     c.drawString(ML, PAGE_H - 137 * mm,
                  "and how every run makes the system measurably better.")
     # stat chips
-    chips = ["13 phases complete", "330 tests passing", "runs fully offline", "local models"]
+    chips = ["13 phases complete", "334 tests passing", "runs fully offline", "local models"]
     x = ML
     c.setFont("Helvetica-Bold", 8.5)
     for ch in chips:
@@ -520,7 +520,7 @@ E.append(callout([
 E.append(Spacer(1, 4 * mm))
 E.append(HRule(CONTENT_W))
 E.append(Spacer(1, 2 * mm))
-E.append(Paragraph("13 phases complete &#183; 330 tests passing &#183; 26 ADRs &#183; "
+E.append(Paragraph("13 phases complete &#183; 334 tests passing &#183; 26 ADRs &#183; "
                    "fully documented &#183; runs on local models.", MUTED))
 
 doc.build(E)

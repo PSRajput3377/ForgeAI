@@ -14,7 +14,7 @@ import httpx
 from github.local_repo import GitCommandError, LocalRepository
 from github.models import PullRequest, Repository
 from github.rest_provider import RestGitHubProvider
-from github.services import PullRequestService, branch_name_for
+from github.services import PullRequestService, branch_name_for, unique_branch_name
 from github.workflow import PRPlan
 
 
@@ -32,9 +32,12 @@ async def execute_live_pr(
     *,
     author_name: str = "ForgeAI",
     author_email: str = "forgeai@users.noreply.github.com",
+    branch_suffix: str | None = None,
 ) -> tuple[str, PullRequest]:
     """Clone → branch → commit → push → open PR. Raises on git/GitHub errors."""
     branch = plan.branch or branch_name_for(plan.kind, plan.task)
+    if branch_suffix:
+        branch = unique_branch_name(branch, branch_suffix)
     work = Path(tempfile.mkdtemp(prefix="forgeai-clone-"))
     try:
         local = await LocalRepository.clone(
@@ -80,6 +83,12 @@ def github_error_message(exc: Exception) -> str:
             return "GitHub repository not found or token cannot access it (404)."
         return f"GitHub API error ({status}): {exc.response.text[:200]}"
     msg = str(exc)
+    if "non-fast-forward" in msg.lower():
+        return (
+            f"{msg} — this branch already exists on GitHub from a previous run. "
+            "Re-run the agent task (a new approval gets a unique branch) or delete "
+            "the old branch on the remote."
+        )
     if "git push" in msg.lower() or "403" in msg:
         return f"{msg} — check GITHUB_TOKEN has push access to the repository."
     return msg

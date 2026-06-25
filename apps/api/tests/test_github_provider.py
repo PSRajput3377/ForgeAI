@@ -3,7 +3,7 @@
 import pytest
 from github.models import CIStatus, PRState, Repository
 from github.provider import FakeGitHubProvider
-from github.services import BranchService, PullRequestService, branch_name_for
+from github.services import BranchService, PullRequestService, branch_name_for, unique_branch_name
 
 
 @pytest.fixture
@@ -15,6 +15,12 @@ def test_branch_naming():
     assert branch_name_for("feature", "Add JWT Auth") == "feature/add-jwt-auth"
     assert branch_name_for("bug", "Token validation fails") == "fix/token-validation-fails"
     assert branch_name_for("docs", "Update README") == "docs/update-readme"
+
+
+def test_unique_branch_name_avoids_collisions():
+    base = branch_name_for("feature", "Add JWT Auth")
+    assert unique_branch_name(base, "5187ad4c") == "feature/add-jwt-auth-5187ad4c"
+    assert unique_branch_name(base, "5187ad4cc3c5409a") == "feature/add-jwt-auth-5187ad4c"
 
 
 @pytest.mark.asyncio

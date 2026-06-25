@@ -37,6 +37,13 @@ def branch_name_for(kind: str, task: str) -> str:
     return f"{prefix}/{slug}"
 
 
+def unique_branch_name(branch: str, suffix: str) -> str:
+    """Append a short suffix so repeated tasks do not collide on ``git push``."""
+    clean = re.sub(r"[^a-z0-9]+", "", suffix.lower())[:8]
+    base = branch.rstrip("-")
+    return f"{base}-{clean}"[:63].rstrip("-")
+
+
 class BranchService:
     def __init__(self, provider: GitHubProvider):
         self.provider = provider

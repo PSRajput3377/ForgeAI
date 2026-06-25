@@ -204,6 +204,7 @@ async def execute_pr(approval_id: str, session: AsyncSession = Depends(get_sessi
                 settings.github_token,
                 author_name=settings.git_author_name,
                 author_email=settings.git_author_email,
+                branch_suffix=approval_id,
             )
         else:
             manager = GitHubManager(build_provider())

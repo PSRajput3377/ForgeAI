@@ -128,7 +128,7 @@ text(s, M, 3600000, 11000000, 1400000, [
     ("then scores every run and gets measurably better over time.", 17, INK, False),
 ], size=17)
 text(s, M, 5750000, 11000000, 500000,
-     "13 phases · 330 tests · fully offline-testable · runs on local models",
+     "13 phases · 334 tests · fully offline-testable · runs on local models",
      size=14, color=MUTE)
 
 # ===========================================================================
@@ -170,7 +170,7 @@ bullets(s, M, 1950000, 10900000, 3600000, [
     ("Multi-agent autonomous engineering", "10 specialist agents, each with one job, coordinated by an explicit workflow graph over one shared state."),
     ("Natural language → reviewed pull request", "describe a task; watch the team plan, code, test, and review it live inside a sandbox."),
     ("A self-improving layer on top", "every run is measured, stored, and compared — prompt versions, benchmarks, failure memory, learning loops."),
-    ("Runs and is fully tested offline", "every external dependency (LLM, GitHub, datastores) has a deterministic fake. 330 tests pass in seconds."),
+    ("Runs and is fully tested offline", "every external dependency (LLM, GitHub, datastores) has a deterministic fake. 334 tests pass in seconds."),
 ], size=18, gap=16)
 
 # ===========================================================================
@@ -332,7 +332,7 @@ bullets(s, M, 1950000, 11000000, 2600000, [
 ], size=16, gap=11)
 box(s, M, 4750000, 10900000, 1150000, fill=PANEL, line=GREEN)
 text(s, M, 4850000, 10900000, 1000000, [
-    ("All 13 phases complete  ·  330 tests passing  ·  26 ADRs  ·  fully documented", 16, GREEN, True),
+    ("All 13 phases complete  ·  334 tests passing  ·  26 ADRs  ·  fully documented", 16, GREEN, True),
     ("From a static pipeline to a self-improving, approval-gated engineering team.", 14, MUTE, False),
 ], size=15, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, space=6)
 

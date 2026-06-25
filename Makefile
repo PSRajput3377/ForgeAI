@@ -60,6 +60,14 @@ web-install: ## Install frontend deps
 web-dev: ## Run the Next.js dev server
 	cd apps/web && npm run dev
 
+.PHONY: wait-api
+wait-api: ## Wait until the API health endpoint responds
+	bash scripts/wait-api.sh
+
+.PHONY: demo-todo
+demo-todo: wait-api ## Full Todo API demo via API (register → bootstrap → 4 runs → PRs)
+	bash scripts/demo-todo-e2e.sh
+
 # ---- Meta ----
 .PHONY: help
 help: ## Show this help
