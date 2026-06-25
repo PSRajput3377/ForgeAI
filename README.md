@@ -65,7 +65,7 @@ improvements — all behind human approval gates.
 **The whole backend runs and is fully tested offline** — no Docker, no models, no
 external services required. Every external dependency (LLM, GitHub, datastores)
 has a deterministic in-memory fake, so the entire system is reproducible in CI.
-**330 tests pass** in seconds.
+**333 tests pass** in seconds.
 
 ---
 
@@ -186,6 +186,11 @@ Full contract: [`specs/projects-spec.md`](specs/projects-spec.md).
 
 The Project model carries a nullable `repo`, so a future **git-backed mode**
 slots in behind the same interface with no agent/workflow change.
+
+**Honest by default:** integrations report their mode — `live` (talks to the
+real system) vs `simulated` (interface-complete, validated against an in-memory
+fake) — at `/integrations/status` and on the Analytics page, so capability is
+never overstated.
 
 ---
 
@@ -377,7 +382,7 @@ external services (every external dependency has a deterministic fake):
 ```bash
 cd apps/api
 uv sync
-uv run pytest -q                                # 330 tests, ~10s
+uv run pytest -q                                # 333 tests, ~10s
 uv run ruff check . && uv run black --check .   # lint + format
 ```
 

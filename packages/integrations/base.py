@@ -55,6 +55,10 @@ class Connector(ABC):
 
     system: System
     capabilities: set[Capability] = {Capability.READ}
+    # Honesty (Phase 13.6): "simulated" = interface-complete, validated against an
+    # in-memory fake; "live" = talks to the real external system. The default is
+    # deliberately "simulated" so a connector never *overstates* its readiness.
+    mode: str = "simulated"
 
     @abstractmethod
     async def search(self, query: str, limit: int = 10) -> list[ExternalObject]:

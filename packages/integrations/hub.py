@@ -57,6 +57,20 @@ class IntegrationHub:
     def systems(self) -> list[System]:
         return sorted(self._connectors)
 
+    def status(self) -> list[dict]:
+        """Honest per-connector status (Phase 13.6): system, mode (simulated /
+        live), and capabilities — so the UI never overstates readiness."""
+        return [
+            {
+                "system": c.system.value if hasattr(c.system, "value") else str(c.system),
+                "mode": getattr(c, "mode", "simulated"),
+                "capabilities": sorted(
+                    cap.value if hasattr(cap, "value") else str(cap) for cap in c.capabilities
+                ),
+            }
+            for c in (self._connectors[s] for s in self.systems())
+        ]
+
     def _check_permission(self, agent: str, system: System, cap: Capability) -> None:
         if agent is None:
             return  # system-level/internal calls bypass per-agent checks

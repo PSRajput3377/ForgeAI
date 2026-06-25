@@ -163,6 +163,19 @@ export async function getBenchmarkTrend(): Promise<
   return (await res.json()).trend ?? [];
 }
 
+// --- Integration honesty (Phase 13.6) ---
+
+export interface IntegrationStatus {
+  github_mode: string;
+  connectors: { system: string; mode: string; capabilities: string[] }[];
+}
+
+export async function getIntegrationStatus(): Promise<IntegrationStatus | null> {
+  const res = await fetch(`${API_URL}/integrations/status`);
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export async function getTimeline(runId: string) {
   const res = await fetch(`${API_URL}/observability/timeline/${runId}`);
   return res.json();

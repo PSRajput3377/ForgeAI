@@ -15,6 +15,7 @@ from app.api.analytics import router as analytics_router
 from app.api.auth import router as auth_router
 from app.api.github import router as github_router
 from app.api.health import router as health_router
+from app.api.integrations import router as integrations_router
 from app.api.observability import router as observability_router
 from app.api.organizations import router as organizations_router
 from app.api.projects import router as projects_router
@@ -58,6 +59,7 @@ app.include_router(analytics_router)
 app.include_router(auth_router)
 app.include_router(organizations_router)
 app.include_router(projects_router)
+app.include_router(integrations_router)
 app.include_router(github_router)
 
 

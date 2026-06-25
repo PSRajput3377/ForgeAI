@@ -12,7 +12,9 @@ import { useEffect, useState } from "react";
 import {
   getAnalyticsOverview,
   getBenchmarkTrend,
+  getIntegrationStatus,
   getPromptComparison,
+  type IntegrationStatus,
   type PromptVersionStats,
   type Stats,
 } from "@/lib/api";
@@ -21,12 +23,14 @@ export default function AnalyticsPage() {
   const [overview, setOverview] = useState<Stats | null>(null);
   const [prompts, setPrompts] = useState<Record<string, PromptVersionStats>>({});
   const [trend, setTrend] = useState<{ forge_version: string; pass_rate: number }[]>([]);
+  const [integrations, setIntegrations] = useState<IntegrationStatus | null>(null);
 
   useEffect(() => {
     const load = () => {
       getAnalyticsOverview().then(setOverview).catch(() => {});
       getPromptComparison().then(setPrompts).catch(() => {});
       getBenchmarkTrend().then(setTrend).catch(() => {});
+      getIntegrationStatus().then(setIntegrations).catch(() => {});
     };
     load();
     const id = setInterval(load, 5000);
@@ -96,7 +100,40 @@ export default function AnalyticsPage() {
           )}
         </Panel>
       </div>
+
+      <div className="mt-6">
+        <Panel title="Integrations">
+          {!integrations ? (
+            <Empty>Loading…</Empty>
+          ) : (
+            <>
+              <p className="mb-3 text-xs text-neutral-500">
+                Honest readiness — <span className="text-neutral-300">live</span> talks to the real
+                system; <span className="text-neutral-300">simulated</span> is interface-complete,
+                validated against an in-memory fake.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                <ModeChip label="GitHub provider" mode={integrations.github_mode} />
+                {integrations.connectors.map((c) => (
+                  <ModeChip key={c.system} label={c.system} mode={c.mode} />
+                ))}
+              </div>
+            </>
+          )}
+        </Panel>
+      </div>
     </main>
+  );
+}
+
+function ModeChip({ label, mode }: { label: string; mode: string }) {
+  const live = mode === "live";
+  return (
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-neutral-800 px-2.5 py-1 text-xs">
+      <span className={`h-1.5 w-1.5 rounded-full ${live ? "bg-green-500" : "bg-yellow-500"}`} />
+      <span className="capitalize text-neutral-300">{label}</span>
+      <span className={live ? "text-green-400" : "text-yellow-500"}>{mode}</span>
+    </span>
   );
 }
 

@@ -28,7 +28,31 @@ from integrations.hub import (
 from integrations.knowledge_graph import Edge, KnowledgeGraph
 from integrations.security import ApprovalRules, ConnectorPermissions, SecretStore
 
+
+def build_default_hub() -> IntegrationHub:
+    """An IntegrationHub with every connector registered.
+
+    Ships the in-memory Fake* connectors (mode='simulated'). Live connectors
+    register the same way once implemented (ADR-0021) — the hub's status()
+    then reports them as 'live'.
+    """
+    hub = IntegrationHub()
+    for connector_cls in (
+        FakeGitHubConnector,
+        FakeJiraConnector,
+        FakeSlackConnector,
+        FakeNotionConnector,
+        FakeConfluenceConnector,
+        FakeEmailConnector,
+        FakeCalendarConnector,
+        FakeFigmaConnector,
+    ):
+        hub.register(connector_cls())
+    return hub
+
+
 __all__ = [
+    "build_default_hub",
     "ApprovalDenied",
     "ApprovalRules",
     "Capability",

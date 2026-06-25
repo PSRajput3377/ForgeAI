@@ -139,5 +139,5 @@ the repo, not DB rows.
       the workspace to the chosen project.
 - [x] A fresh user can go from sign-in to a working project in the first minute
       with `MODEL_PROVIDER=echo`.
-- [ ] Fake-validated integrations are labelled in the UI/docs.
-- [ ] Offline suite green; ruff + black clean; docs + an ADR updated.
+- [x] Fake-validated integrations are labelled in the UI/docs.
+- [x] Offline suite green; ruff + black clean; docs + an ADR updated.
