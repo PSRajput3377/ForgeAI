@@ -44,33 +44,36 @@ export default function LoginPage() {
 
   return (
     <main className="flex min-h-screen items-center justify-center p-6">
-      <form
-        onSubmit={submit}
-        className="w-full max-w-sm space-y-4 rounded-lg border border-neutral-800 p-6"
-      >
-        <h1 className="text-xl font-semibold">
-          {mode === "login" ? "Sign in to ForgeAI" : "Create your account"}
-        </h1>
+      <form onSubmit={submit} className="glass rise w-full max-w-sm space-y-5 p-8">
+        <div className="text-center">
+          <h1 className="gradient-text text-3xl font-bold tracking-tight">ForgeAI</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            {mode === "login" ? "Welcome back" : "Create your account"}
+          </p>
+        </div>
 
-        {mode === "register" && (
-          <Input label="Name" value={name} onChange={setName} type="text" />
+        <div className="space-y-3">
+          {mode === "register" && (
+            <Input label="Name" value={name} onChange={setName} type="text" />
+          )}
+          <Input label="Email" value={email} onChange={setEmail} type="email" />
+          <Input label="Password" value={password} onChange={setPassword} type="password" />
+        </div>
+
+        {error && (
+          <p className="rounded-lg border border-[var(--red)]/30 bg-[var(--red)]/10 px-3 py-2 text-xs text-[var(--red)]">
+            {error}
+          </p>
         )}
-        <Input label="Email" value={email} onChange={setEmail} type="email" />
-        <Input label="Password" value={password} onChange={setPassword} type="password" />
 
-        {error && <p className="text-sm text-red-400">{error}</p>}
-
-        <button
-          type="submit"
-          className="w-full rounded-md bg-blue-600 py-2 text-sm font-medium hover:bg-blue-500"
-        >
-          {mode === "login" ? "Login" : "Register"}
+        <button type="submit" className="btn-primary w-full py-2.5 text-sm">
+          {mode === "login" ? "Sign in" : "Create account"}
         </button>
 
         <button
           type="button"
           onClick={() => setMode(mode === "login" ? "register" : "login")}
-          className="w-full text-xs text-neutral-400 hover:text-neutral-200"
+          className="w-full text-xs text-[var(--muted)] transition hover:text-[var(--foreground)]"
         >
           {mode === "login" ? "Need an account? Register" : "Have an account? Sign in"}
         </button>
@@ -92,13 +95,13 @@ function Input({
 }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs text-neutral-400">{label}</span>
+      <span className="mb-1.5 block text-xs text-[var(--muted)]">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
-        className="w-full rounded-md border border-neutral-700 bg-neutral-900 px-3 py-2 text-sm"
+        className="w-full rounded-xl border border-[var(--panel-border)] bg-black/30 px-3 py-2.5 text-sm transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20"
       />
     </label>
   );

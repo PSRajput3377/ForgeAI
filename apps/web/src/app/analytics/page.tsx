@@ -38,17 +38,22 @@ export default function AnalyticsPage() {
   }, []);
 
   return (
-    <main className="min-h-screen p-6">
-      <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">Agent Analytics</h1>
-        <a href="/workspace" className="text-xs text-neutral-400 hover:text-neutral-200">
+    <main className="mx-auto min-h-screen max-w-5xl p-6 py-10">
+      <header className="rise mb-8 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Agent Analytics</h1>
+          <p className="mt-1 text-sm text-[var(--muted)]">
+            How the team performs — and how it&apos;s improving.
+          </p>
+        </div>
+        <a href="/workspace" className="btn-ghost px-3 py-1.5 text-xs">
           ← Workspace
         </a>
       </header>
 
       <Panel title="Overview">
         {overview && overview.runs > 0 ? (
-          <div className="flex flex-wrap gap-8">
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
             <Stat label="Runs" value={String(overview.runs)} />
             <Stat label="Success" value={pct(overview.success_rate)} />
             <Stat label="Mean score" value={overview.mean_score.toFixed(2)} />
@@ -156,7 +161,9 @@ function PromptRole({ role, data }: { role: string; data: PromptVersionStats }) 
             <div key={version} className="flex items-center gap-3 text-xs text-neutral-400">
               <span className="w-10">{version}</span>
               {version === data.active_version && (
-                <span className="rounded bg-blue-900/60 px-1.5 text-blue-300">active</span>
+                <span className="rounded-full bg-[var(--accent)]/15 px-2 py-0.5 text-[var(--accent)]">
+                  active
+                </span>
               )}
               <span>{pct(s.mean_score, true)} score</span>
               <span className="text-neutral-600">·</span>
@@ -182,8 +189,11 @@ function pct(value: number, ofOne = false) {
 
 function Panel({ title, children }: { title: string; children: React.ReactNode }) {
   return (
-    <section className="rounded-lg border border-neutral-800 p-4">
-      <h2 className="mb-3 text-xs uppercase tracking-wide text-neutral-500">{title}</h2>
+    <section className="glass rise p-5">
+      <div className="mb-4 flex items-center gap-2">
+        <span className="h-3 w-1 rounded-full bg-[var(--accent)]" />
+        <h2 className="label">{title}</h2>
+      </div>
       {children}
     </section>
   );
@@ -191,13 +201,17 @@ function Panel({ title, children }: { title: string; children: React.ReactNode }
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div>
+    <div className="rounded-xl border border-[var(--panel-border)] bg-black/20 px-4 py-3">
       <p className="text-2xl font-semibold">{value}</p>
-      <p className="text-xs text-neutral-500">{label}</p>
+      <p className="mt-0.5 text-xs text-[var(--faint)]">{label}</p>
     </div>
   );
 }
 
 function Empty({ children }: { children: React.ReactNode }) {
-  return <p className="text-sm text-neutral-500">{children}</p>;
+  return (
+    <div className="flex h-20 items-center justify-center text-sm text-[var(--faint)]">
+      {children}
+    </div>
+  );
 }

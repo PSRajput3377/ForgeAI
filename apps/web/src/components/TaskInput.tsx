@@ -48,7 +48,7 @@ export function TaskInput() {
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <div className="flex gap-3">
         <textarea
           value={task}
@@ -57,75 +57,100 @@ export function TaskInput() {
           placeholder="Describe a task — e.g. “Add JWT authentication”"
           rows={2}
           disabled={running}
-          className="flex-1 resize-none rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-sm text-neutral-100 placeholder:text-neutral-600 focus:border-neutral-600 focus:outline-none disabled:opacity-60"
+          className="flex-1 resize-none rounded-xl border border-[var(--panel-border)] bg-black/30 px-4 py-3 text-sm text-[var(--foreground)] placeholder:text-[var(--faint)] transition focus:border-[var(--accent)] focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/20 disabled:opacity-60"
         />
         <button
           onClick={submit}
           disabled={running || !task.trim()}
-          className="shrink-0 self-stretch rounded-md bg-white px-5 text-sm font-medium text-black transition hover:bg-neutral-200 disabled:cursor-not-allowed disabled:opacity-40"
+          className="btn-primary inline-flex shrink-0 items-center gap-2 self-stretch px-6 text-sm"
         >
-          {running ? "Running…" : "Run"}
+          {running ? (
+            <>
+              <span className="spin-slow h-3.5 w-3.5 rounded-full border-2 border-white/70 border-t-transparent" />
+              Running
+            </>
+          ) : (
+            <>Run ↵</>
+          )}
         </button>
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
-        <span className="text-xs text-neutral-600">Try:</span>
+        <span className="text-xs text-[var(--faint)]">Try</span>
         {SUGGESTIONS.map((s) => (
           <button
             key={s}
             onClick={() => setTask(s)}
             disabled={running}
-            className="rounded-full border border-neutral-800 px-2.5 py-1 text-xs text-neutral-400 transition hover:border-neutral-600 hover:text-neutral-200 disabled:opacity-50"
+            className="chip px-3 py-1 text-xs text-[var(--muted)] transition hover:border-white/20 hover:text-[var(--foreground)] disabled:opacity-50"
           >
             {s}
           </button>
         ))}
+        <span className="ml-auto text-xs text-[var(--faint)]">⌘/Ctrl + Enter to run</span>
       </div>
 
-      <p className="text-xs text-neutral-600">
-        ⌘/Ctrl + Enter to run. Watch the agents work live below.
-      </p>
-
       {error && (
-        <p className="rounded-md border border-red-900 bg-red-950/40 px-3 py-2 text-xs text-red-400">
+        <div className="rise rounded-xl border border-[var(--red)]/30 bg-[var(--red)]/10 px-4 py-3 text-xs text-[var(--red)]">
           {error}
-        </p>
+        </div>
       )}
 
       {result && (
-        <div className="rounded-md border border-neutral-800 bg-neutral-950 px-3 py-2 text-xs text-neutral-300">
-          <p>
-            <span className="text-neutral-500">Verdict:</span>{" "}
-            <span
-              className={
-                result.review_verdict === "approved" ? "text-green-400" : "text-yellow-400"
-              }
-            >
-              {result.review_verdict}
-            </span>{" "}
-            · {result.tasks} tasks · {result.retries} retries ·{" "}
-            {result.files_changed.length} files changed
-          </p>
+        <div className="rise rounded-xl border border-[var(--panel-border)] bg-black/20 px-4 py-3 text-xs">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <StatusBadge verdict={result.review_verdict} />
+            <Stat label="tasks" value={result.tasks} />
+            <Stat label="retries" value={result.retries} />
+            <Stat label="files" value={result.files_changed.length} />
+          </div>
           {result.final_response && (
-            <p className="mt-1 whitespace-pre-wrap text-neutral-400">{result.final_response}</p>
+            <p className="mt-2 whitespace-pre-wrap leading-relaxed text-[var(--muted)]">
+              {result.final_response}
+            </p>
           )}
           {result.pr_approval_id && (
-            <p className="mt-2 text-green-400">
-              PR proposed — open <span className="text-neutral-500">Pending Approvals</span>{" "}
-              to review and execute.
+            <p className="mt-2 text-[var(--green)]">
+              ✓ PR proposed — open{" "}
+              <span className="text-[var(--muted)]">Pending approvals</span> to review &amp; execute.
             </p>
           )}
         </div>
       )}
 
       {result && Object.keys(result.generated_files ?? {}).length > 0 && (
-        <div className="rounded-lg border border-neutral-800 p-4">
-          <h3 className="mb-3 text-xs uppercase tracking-wide text-neutral-500">
-            Generated code
-          </h3>
+        <div className="rise rounded-xl border border-[var(--panel-border)] bg-black/20 p-4">
+          <h3 className="label mb-3">Generated code</h3>
           <GeneratedFiles files={result.generated_files} />
         </div>
       )}
     </div>
+  );
+}
+
+function StatusBadge({ verdict }: { verdict: string }) {
+  const ok = verdict === "approved";
+  return (
+    <span
+      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
+      style={{
+        background: ok ? "rgba(52,211,153,0.12)" : "rgba(251,191,36,0.12)",
+        color: ok ? "var(--green)" : "var(--amber)",
+      }}
+    >
+      <span
+        className="h-1.5 w-1.5 rounded-full"
+        style={{ background: ok ? "var(--green)" : "var(--amber)" }}
+      />
+      {verdict}
+    </span>
+  );
+}
+
+function Stat({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="text-[var(--muted)]">
+      <span className="font-semibold text-[var(--foreground)]">{value}</span> {label}
+    </span>
   );
 }

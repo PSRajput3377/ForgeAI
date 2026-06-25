@@ -8,15 +8,25 @@ import type { ForgeEvent } from "@/lib/api";
  */
 export function AgentTimeline({ events }: { events: ForgeEvent[] }) {
   if (events.length === 0) {
-    return <p className="text-sm text-neutral-500">No events yet.</p>;
+    return (
+      <div className="flex h-40 items-center justify-center text-sm text-[var(--faint)]">
+        Waiting for a run…
+      </div>
+    );
   }
   return (
-    <ol className="space-y-1 font-mono text-xs">
+    <ol className="max-h-[420px] space-y-0.5 overflow-y-auto font-mono text-xs">
       {events.map((e) => (
-        <li key={e.tick} className="flex gap-3">
-          <span className="w-20 shrink-0 text-neutral-600">{clock(e.timestamp)}</span>
-          <span className={`w-1.5 shrink-0 ${dotColor(e.type)}`}>●</span>
-          <span className="text-neutral-200">{label(e)}</span>
+        <li
+          key={e.tick}
+          className="rise flex items-center gap-3 rounded-lg px-2 py-1.5 transition hover:bg-white/[0.03]"
+        >
+          <span className="w-[68px] shrink-0 text-[var(--faint)]">{clock(e.timestamp)}</span>
+          <span
+            className="h-2 w-2 shrink-0 rounded-full"
+            style={{ background: dotColor(e.type), boxShadow: `0 0 8px -1px ${dotColor(e.type)}` }}
+          />
+          <span className="text-[var(--foreground)]/90">{label(e)}</span>
         </li>
       ))}
     </ol>
@@ -64,10 +74,10 @@ function title(s: string): string {
 }
 
 function dotColor(type: string): string {
-  if (type.includes("failed")) return "text-red-400";
+  if (type.includes("failed")) return "var(--red)";
   if (type.includes("completed") || type.includes("passed") || type.includes("resolved"))
-    return "text-green-400";
-  if (type.includes("requested") || type.includes("approval")) return "text-yellow-400";
-  if (type.includes("started")) return "text-blue-400";
-  return "text-neutral-400";
+    return "var(--green)";
+  if (type.includes("requested") || type.includes("approval")) return "var(--amber)";
+  if (type.includes("started")) return "var(--accent)";
+  return "var(--faint)";
 }

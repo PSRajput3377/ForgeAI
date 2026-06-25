@@ -27,9 +27,9 @@ export function ApiStatus() {
   }[status];
 
   return (
-    <div className="flex items-center gap-2 rounded-md border border-neutral-800 px-4 py-2">
-      <span className={`h-2 w-2 rounded-full ${color}`} />
-      <span className="text-sm text-neutral-300">{label}</span>
+    <div className="chip inline-flex items-center gap-2 px-4 py-2">
+      <span className={`h-2 w-2 rounded-full ${color} ${status === "ok" ? "pulse-ring" : ""}`} />
+      <span className="text-sm text-[var(--muted)]">{label}</span>
     </div>
   );
 }

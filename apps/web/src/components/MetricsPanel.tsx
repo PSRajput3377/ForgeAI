@@ -20,34 +20,45 @@ export function MetricsPanel() {
     return () => clearInterval(id);
   }, []);
 
-  if (!metrics) return <p className="text-sm text-neutral-500">Loading metrics…</p>;
+  if (!metrics)
+    return (
+      <div className="flex h-24 items-center justify-center text-sm text-[var(--faint)]">
+        Loading…
+      </div>
+    );
 
   return (
-    <div className="space-y-3 text-sm">
-      <div className="flex gap-6">
+    <div className="space-y-4 text-sm">
+      <div className="grid grid-cols-2 gap-3">
         <Stat label="Tasks" value={String(metrics.tasks_total)} />
-        <Stat label="Success" value={`${Math.round(metrics.success_rate * 100)}%`} />
+        <Stat label="Success" value={`${Math.round(metrics.success_rate * 100)}%`} accent />
       </div>
       <div>
-        <p className="mb-1 text-xs uppercase text-neutral-500">Per agent</p>
-        {Object.entries(metrics.agents).map(([name, s]) => (
-          <div key={name} className="flex justify-between text-xs text-neutral-400">
-            <span className="capitalize">{name}</span>
-            <span>
-              {Math.round(s.success_rate * 100)}% · {s.avg_duration.toFixed(2)}s · {s.runs} runs
-            </span>
-          </div>
-        ))}
+        <p className="label mb-2">Per agent</p>
+        <div className="space-y-1.5">
+          {Object.entries(metrics.agents).map(([name, s]) => (
+            <div key={name} className="flex items-center justify-between text-xs">
+              <span className="capitalize text-[var(--foreground)]/80">{name}</span>
+              <span className="text-[var(--muted)]">
+                {Math.round(s.success_rate * 100)}% · {s.avg_duration.toFixed(2)}s · {s.runs}
+              </span>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-function Stat({ label, value }: { label: string; value: string }) {
+function Stat({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
-    <div>
-      <p className="text-2xl font-semibold">{value}</p>
-      <p className="text-xs text-neutral-500">{label}</p>
+    <div className="rounded-xl border border-[var(--panel-border)] bg-black/20 p-3">
+      <p
+        className={`text-2xl font-semibold ${accent ? "text-[var(--green)]" : "text-[var(--foreground)]"}`}
+      >
+        {value}
+      </p>
+      <p className="mt-0.5 text-xs text-[var(--faint)]">{label}</p>
     </div>
   );
 }

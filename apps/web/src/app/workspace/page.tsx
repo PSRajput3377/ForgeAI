@@ -27,50 +27,55 @@ export default function WorkspacePage() {
     if (!projectId) window.location.href = "/projects";
   }, [projectId]);
 
+  const live = status === "open";
   return (
-    <main className="min-h-screen p-6">
-      <header className="mb-6 flex items-center justify-between">
+    <main className="mx-auto min-h-screen max-w-7xl p-6">
+      <header className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-xl font-semibold">{projectName ?? "ForgeAI Workspace"}</h1>
-          <a href="/projects" className="text-xs text-neutral-500 hover:text-neutral-300">
+          <a
+            href="/projects"
+            className="mb-1 inline-block text-xs text-[var(--faint)] transition hover:text-[var(--muted)]"
+          >
             ← All projects
           </a>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            {projectName ?? "Workspace"}
+          </h1>
         </div>
-        <div className="flex items-center gap-4">
-        <a href="/analytics" className="text-xs text-neutral-400 hover:text-neutral-200">
-          Analytics →
-        </a>
-        <span className="flex items-center gap-2 text-xs">
-          <span
-            className={`h-2 w-2 rounded-full ${
-              status === "open" ? "bg-green-500" : status === "connecting" ? "bg-yellow-500" : "bg-red-500"
-            }`}
-          />
-          {status === "open" ? "live" : status}
-        </span>
+        <div className="flex items-center gap-3">
+          <a href="/analytics" className="btn-ghost px-3 py-1.5 text-xs">
+            Analytics →
+          </a>
+          <span className="chip inline-flex items-center gap-2 px-3 py-1.5 text-xs">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                live ? "bg-[var(--green)] pulse-ring" : status === "connecting" ? "bg-[var(--amber)]" : "bg-[var(--red)]"
+              }`}
+            />
+            <span className="text-[var(--muted)]">{live ? "live" : status}</span>
+          </span>
         </div>
       </header>
 
       {/* Entry point: describe a task and run the agent team */}
-      <Panel title="New Task">
+      <Panel title="New task" accent="var(--accent)" delay="0s">
         <TaskInput />
       </Panel>
 
-      {/* PR Approval Center */}
       <div className="mt-6">
-        <Panel title="Pending Approvals">
+        <Panel title="Pending approvals" accent="var(--amber)" delay="0.05s">
           <ApprovalCenter />
         </Panel>
       </div>
 
-      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[220px_1fr_280px]">
-        <Panel title="Agents">
+      <div className="mt-6 grid grid-cols-1 gap-6 lg:grid-cols-[240px_1fr_300px]">
+        <Panel title="Agents" accent="var(--accent-3)" delay="0.1s">
           <AgentStatus events={events} />
         </Panel>
-        <Panel title="Timeline">
+        <Panel title="Timeline" accent="var(--accent)" delay="0.15s">
           <AgentTimeline events={events} />
         </Panel>
-        <Panel title="Metrics">
+        <Panel title="Metrics" accent="var(--accent-2)" delay="0.2s">
           <MetricsPanel />
         </Panel>
       </div>
@@ -78,10 +83,23 @@ export default function WorkspacePage() {
   );
 }
 
-function Panel({ title, children }: { title: string; children: React.ReactNode }) {
+function Panel({
+  title,
+  accent,
+  delay,
+  children,
+}: {
+  title: string;
+  accent: string;
+  delay: string;
+  children: React.ReactNode;
+}) {
   return (
-    <section className="rounded-lg border border-neutral-800 p-4">
-      <h2 className="mb-3 text-xs uppercase tracking-wide text-neutral-500">{title}</h2>
+    <section className="glass rise p-5" style={{ animationDelay: delay }}>
+      <div className="mb-4 flex items-center gap-2">
+        <span className="h-3 w-1 rounded-full" style={{ background: accent }} />
+        <h2 className="label">{title}</h2>
+      </div>
       {children}
     </section>
   );
