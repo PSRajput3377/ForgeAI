@@ -36,7 +36,7 @@ export default function LoginPage() {
       if (!r.ok) throw new Error((await r.json()).detail ?? "Login failed");
       const tokens = await r.json();
       setSession(tokens.access_token, tokens.refresh_token);
-      window.location.href = "/workspace";
+      window.location.href = "/projects";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     }

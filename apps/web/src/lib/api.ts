@@ -4,6 +4,86 @@ export const API_URL =
 
 export const WS_URL = API_URL.replace(/^http/, "ws");
 
+/** Bearer auth header from the persisted access token (empty if signed out). */
+export function authHeaders(): Record<string, string> {
+  const token =
+    typeof window !== "undefined" ? window.localStorage.getItem("forge.access") : null;
+  return token ? { Authorization: `Bearer ${token}` } : {};
+}
+
+// --- Projects & onboarding (Phase 13) ---
+
+export interface Project {
+  id: string;
+  workspace_id: string;
+  name: string;
+  description: string | null;
+  path: string | null;
+  repo: string | null;
+  starter: string | null;
+}
+
+export interface Starter {
+  id: string;
+  name: string;
+  description: string;
+  tags: string[];
+}
+
+export async function listStarters(): Promise<Starter[]> {
+  const res = await fetch(`${API_URL}/projects/starters`);
+  if (!res.ok) return [];
+  return (await res.json()).starters ?? [];
+}
+
+export async function listProjects(workspaceId: string): Promise<Project[]> {
+  const res = await fetch(`${API_URL}/projects?workspace_id=${workspaceId}`, {
+    headers: authHeaders(),
+  });
+  if (!res.ok) return [];
+  return (await res.json()).projects ?? [];
+}
+
+/** Ensure the signed-in user has a workspace; create a default org if not.
+ *  Returns the workspace id. */
+export async function ensureWorkspace(): Promise<string | null> {
+  // Try to reuse a workspace the user already owns by creating an org only once.
+  const res = await fetch(`${API_URL}/orgs`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ name: "My Workspace" }),
+  });
+  if (!res.ok) return null;
+  return (await res.json()).workspace_id ?? null;
+}
+
+export async function createProject(
+  workspaceId: string,
+  name: string
+): Promise<Project | null> {
+  const res = await fetch(`${API_URL}/projects`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ workspace_id: workspaceId, name }),
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
+export async function bootstrapProject(
+  workspaceId: string,
+  name: string,
+  starter: string
+): Promise<(Project & { scaffolded_files: string[] }) | null> {
+  const res = await fetch(`${API_URL}/projects/bootstrap`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", ...authHeaders() },
+    body: JSON.stringify({ workspace_id: workspaceId, name, starter }),
+  });
+  if (!res.ok) return null;
+  return res.json();
+}
+
 export interface ForgeEvent {
   type: string;
   run_id: string | null;
@@ -21,6 +101,8 @@ export interface RunResult {
   generated_files: Record<string, string>;
   retries: number;
   pr_approval_id?: string | null;
+  project_id?: string | null;
+  written_files?: string[];
 }
 
 /** Kick off the multi-agent workflow for a task. Resolves when the run finishes;
@@ -31,7 +113,7 @@ export async function runAgents(
 ): Promise<RunResult> {
   const res = await fetch(`${API_URL}/agents/run`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: { "Content-Type": "application/json", ...authHeaders() },
     body: JSON.stringify({ user_request: userRequest, project_id: projectId ?? null }),
   });
   if (!res.ok) {

@@ -135,7 +135,7 @@ the repo, not DB rows.
       files there, and 404s on an unknown id.
 - [x] At least two starters exist (empty + FastAPI); bootstrap scaffolds
       deterministically and offline, then hands off to the pipeline.
-- [ ] The UI opens on a project chooser (Create New / Open Existing) and binds
+- [x] The UI opens on a project chooser (Create New / Open Existing) and binds
       the workspace to the chosen project.
 - [ ] A fresh user can go from sign-in to a working project in the first minute
       with `MODEL_PROVIDER=echo`.

@@ -8,20 +8,34 @@
  * Reject. Below it, the live observability panels (agents, timeline, metrics)
  * driven by the backend event WebSocket.
  */
+import { useEffect } from "react";
 import { useEventStream } from "@/hooks/useEventStream";
 import { AgentStatus } from "@/components/AgentStatus";
 import { AgentTimeline } from "@/components/AgentTimeline";
 import { ApprovalCenter } from "@/components/ApprovalCenter";
 import { MetricsPanel } from "@/components/MetricsPanel";
 import { TaskInput } from "@/components/TaskInput";
+import { useAppStore } from "@/store/useAppStore";
 
 export default function WorkspacePage() {
   const { events, status } = useEventStream();
+  const projectId = useAppStore((s) => s.activeProjectId);
+  const projectName = useAppStore((s) => s.activeProjectName);
+
+  // No project selected → send the user to the chooser (the front door).
+  useEffect(() => {
+    if (!projectId) window.location.href = "/projects";
+  }, [projectId]);
 
   return (
     <main className="min-h-screen p-6">
       <header className="mb-6 flex items-center justify-between">
-        <h1 className="text-xl font-semibold">ForgeAI Workspace</h1>
+        <div>
+          <h1 className="text-xl font-semibold">{projectName ?? "ForgeAI Workspace"}</h1>
+          <a href="/projects" className="text-xs text-neutral-500 hover:text-neutral-300">
+            ← All projects
+          </a>
+        </div>
         <div className="flex items-center gap-4">
         <a href="/analytics" className="text-xs text-neutral-400 hover:text-neutral-200">
           Analytics →

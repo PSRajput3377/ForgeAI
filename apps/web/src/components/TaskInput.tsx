@@ -3,13 +3,15 @@
 import { useState } from "react";
 import { GeneratedFiles } from "@/components/GeneratedFiles";
 import { runAgents, type RunResult } from "@/lib/api";
+import { useAppStore } from "@/store/useAppStore";
 
 /**
  * Task input — the way to *start* a run from the workspace. Submits the request
- * to POST /agents/run; the agents/timeline/metrics panels update live over the
- * WebSocket while the run executes, and the final verdict is shown here.
+ * to POST /agents/run against the active project; the agents/timeline/metrics
+ * panels update live over the WebSocket, and the final verdict is shown here.
  */
 export function TaskInput() {
+  const projectId = useAppStore((s) => s.activeProjectId);
   const [task, setTask] = useState("");
   const [running, setRunning] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -22,7 +24,7 @@ export function TaskInput() {
     setError(null);
     setResult(null);
     try {
-      setResult(await runAgents(request));
+      setResult(await runAgents(request, projectId ?? undefined));
     } catch (e) {
       setError(e instanceof Error ? e.message : "Run failed");
     } finally {
