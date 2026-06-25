@@ -7,6 +7,7 @@ own workspaces.
 
 from __future__ import annotations
 
+import uuid
 from datetime import UTC, datetime, timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
@@ -30,7 +31,11 @@ router = APIRouter(prefix="/orgs", tags=["organizations"])
 
 
 def _slugify(name: str) -> str:
-    return "".join(c if c.isalnum() else "-" for c in name.lower()).strip("-")
+    base = "".join(c if c.isalnum() else "-" for c in name.lower()).strip("-") or "org"
+    # The slug has a UNIQUE constraint, but org names are not unique (every user's
+    # default workspace is "My Workspace"). Append a short unique suffix so two
+    # users creating same-named orgs never collide (would otherwise 500).
+    return f"{base}-{uuid.uuid4().hex[:8]}"
 
 
 class CreateOrg(BaseModel):
