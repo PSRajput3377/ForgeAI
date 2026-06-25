@@ -11,6 +11,7 @@ from __future__ import annotations
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from sqlalchemy.ext.asyncio import AsyncSession
+from starters import list_starters
 
 from app.auth.deps import current_user, require_workspace_role
 from app.db.base import get_session
@@ -25,6 +26,13 @@ class CreateProject(BaseModel):
     name: str
     description: str | None = None
     starter: str | None = None  # used by bootstrap (13.3); plain create ignores it
+
+
+class BootstrapProject(BaseModel):
+    workspace_id: str
+    name: str
+    starter: str  # the starter id to scaffold from
+    description: str | None = None
 
 
 def _view(p: Project) -> dict:
@@ -66,6 +74,44 @@ async def create_project(
         starter=body.starter,
     )
     return _view(project)
+
+
+@router.get("/starters")
+async def starters() -> dict:
+    """List available project starters (for the chooser). Public metadata."""
+    return {"starters": [s.model_dump() for s in list_starters()]}
+
+
+@router.post("/bootstrap", status_code=201)
+async def bootstrap_project(
+    body: BootstrapProject,
+    user: User = Depends(current_user),
+    session: AsyncSession = Depends(get_session),
+) -> dict:
+    """Create a project and scaffold it from a starter template (Phase 13.3).
+
+    Deterministic + offline; the scaffolded project is then ready for the agent
+    pipeline. Requires MEMBER+ in the workspace.
+    """
+    await require_workspace_role(body.workspace_id, Role.MEMBER, user, session)
+    svc = ProjectService(session)
+    project = await svc.create(
+        workspace_id=body.workspace_id,
+        name=body.name,
+        description=body.description,
+        starter=body.starter,
+    )
+    try:
+        written = svc.scaffold(project, body.starter)
+    except KeyError:
+        # Unknown starter — roll back the just-created project + dir.
+        await svc.delete(project)
+        raise HTTPException(
+            status.HTTP_400_BAD_REQUEST, f"Unknown starter '{body.starter}'"
+        ) from None
+    out = _view(project)
+    out["scaffolded_files"] = written
+    return out
 
 
 @router.get("")

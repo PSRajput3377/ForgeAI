@@ -133,7 +133,7 @@ the repo, not DB rows.
       enforce workspace isolation.
 - [x] `/agents/run` binds to a real `project_id`, runs against its path, writes
       files there, and 404s on an unknown id.
-- [ ] At least two starters exist (empty + FastAPI); bootstrap scaffolds
+- [x] At least two starters exist (empty + FastAPI); bootstrap scaffolds
       deterministically and offline, then hands off to the pipeline.
 - [ ] The UI opens on a project chooser (Create New / Open Existing) and binds
       the workspace to the chosen project.

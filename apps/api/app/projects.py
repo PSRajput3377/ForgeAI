@@ -63,6 +63,23 @@ class ProjectService:
         )
         return list(result.scalars().all())
 
+    def scaffold(self, project: Project, starter_id: str) -> list[str]:
+        """Scaffold a starter template into the project dir (Phase 13.3).
+
+        Deterministic and offline. Refuses to scaffold into a non-empty project
+        (never silently overwrites — spec §3). Returns the files written.
+        """
+        from starters import get_starter
+
+        root = Path(project.path).resolve() if project.path else None
+        if root is None:
+            raise ValueError("project has no workspace path")
+        existing = list(root.iterdir()) if root.exists() else []
+        if existing:
+            raise ValueError("project is not empty; refusing to scaffold over it")
+        files = get_starter(starter_id)  # KeyError on unknown starter
+        return self.write_files(project, files)
+
     def write_files(self, project: Project, files: dict[str, str]) -> list[str]:
         """Write generated files into the project's workspace dir (Phase 13.2).
 

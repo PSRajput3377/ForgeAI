@@ -159,3 +159,94 @@ async def test_run_without_project_still_works(client, echo_router):
         resp = await client.post("/agents/run", json={"user_request": "just run"})
     assert resp.status_code == 200
     assert resp.json()["written_files"] == []
+
+
+# --- 13.3: project bootstrap from starters ----------------------------------
+
+
+@pytest.mark.asyncio
+async def test_list_starters(client):
+    token = await _user(client, "a@x.com")
+    resp = await client.get("/projects/starters", headers=_auth(token))
+    assert resp.status_code == 200
+    ids = {s["id"] for s in resp.json()["starters"]}
+    assert {"empty", "fastapi-saas"} <= ids
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_scaffolds_fastapi_starter(client):
+    token = await _user(client, "a@x.com")
+    ws = await _workspace(client, token)
+    resp = await client.post(
+        "/projects/bootstrap",
+        json={"workspace_id": ws, "name": "SaaS", "starter": "fastapi-saas"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 201
+    body = resp.json()
+    assert "app/main.py" in body["scaffolded_files"]
+    assert "Dockerfile" in body["scaffolded_files"]
+    # The files physically exist under the project dir.
+    root = Path(body["path"])
+    assert (root / "app" / "main.py").is_file()
+    assert (root / "tests" / "test_app.py").is_file()
+    assert "JWT" in (root / "README.md").read_text()
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_empty_starter(client):
+    token = await _user(client, "a@x.com")
+    ws = await _workspace(client, token)
+    resp = await client.post(
+        "/projects/bootstrap",
+        json={"workspace_id": ws, "name": "Blank", "starter": "empty"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 201
+    assert resp.json()["scaffolded_files"] == ["README.md"]
+
+
+@pytest.mark.asyncio
+async def test_bootstrap_unknown_starter_is_400_and_rolls_back(client):
+    token = await _user(client, "a@x.com")
+    ws = await _workspace(client, token)
+    resp = await client.post(
+        "/projects/bootstrap",
+        json={"workspace_id": ws, "name": "Nope", "starter": "does-not-exist"},
+        headers=_auth(token),
+    )
+    assert resp.status_code == 400
+    # The rolled-back project is not listed.
+    listing = await client.get(f"/projects?workspace_id={ws}", headers=_auth(token))
+    assert listing.json()["projects"] == []
+
+
+@pytest.mark.asyncio
+async def test_scaffold_refuses_non_empty_project(tmp_path):
+    """Bootstrapping into a project that already has files is refused (no overwrite)."""
+    from app.db.base import Base
+    from app.db.models import Organization, User, Workspace
+    from app.projects import ProjectService
+    from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
+
+    engine = create_async_engine("sqlite+aiosqlite://", future=True)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+    async with async_sessionmaker(engine, expire_on_commit=False)() as session:
+        user = User(email="s@x.com", name="s", password_hash="x")
+        session.add(user)
+        await session.flush()
+        org = Organization(name="O", slug="o", owner_id=user.id)
+        session.add(org)
+        await session.flush()
+        ws = Workspace(organization_id=org.id, name="W")
+        session.add(ws)
+        await session.flush()
+
+        svc = ProjectService(session, workspaces_root=str(tmp_path / "ws"))
+        project = await svc.create(workspace_id=ws.id, name="Used")
+        (Path(project.path) / "existing.txt").write_text("keep me")
+
+        with pytest.raises(ValueError, match="not empty"):
+            svc.scaffold(project, "empty")
+    await engine.dispose()
