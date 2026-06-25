@@ -63,6 +63,26 @@ class ProjectService:
         )
         return list(result.scalars().all())
 
+    def write_files(self, project: Project, files: dict[str, str]) -> list[str]:
+        """Write generated files into the project's workspace dir (Phase 13.2).
+
+        Each relative path is resolved under the project root and validated to
+        stay inside it — a path that would escape (``..``, absolute) is skipped,
+        never written. Returns the list of paths actually written.
+        """
+        if not project.path:
+            return []
+        root = Path(project.path).resolve()
+        written: list[str] = []
+        for rel, content in files.items():
+            target = (root / rel).resolve()
+            if root != target and root not in target.parents:
+                continue  # path escapes the project dir — refuse it
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(content, encoding="utf-8")
+            written.append(rel)
+        return written
+
     async def delete(self, project: Project) -> None:
         """Remove the project row and its workspace directory."""
         if project.path:

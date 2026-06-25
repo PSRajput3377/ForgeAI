@@ -6,6 +6,7 @@ a tmp dir so no real directories are touched. Proves spec §1. All offline.
 
 import os
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -112,3 +113,49 @@ async def test_project_path_stays_under_root(client, _tmp_workspaces):
     ).json()
     root = (_tmp_workspaces / "ws").resolve()
     assert os.path.commonpath([root, Path(created["path"]).resolve()]) == str(root)
+
+
+# --- 13.2: /agents/run binds to a real project ------------------------------
+
+
+@pytest.mark.asyncio
+async def test_run_writes_files_into_project_dir(client, echo_router):
+    token = await _user(client, "a@x.com")
+    ws = await _workspace(client, token)
+    created = (
+        await client.post(
+            "/projects", json={"workspace_id": ws, "name": "Bound"}, headers=_auth(token)
+        )
+    ).json()
+
+    with patch("app.agents_runtime.build_router", return_value=echo_router):
+        resp = await client.post(
+            "/agents/run",
+            json={"user_request": "Add a health endpoint", "project_id": created["id"]},
+        )
+    assert resp.status_code == 200
+    body = resp.json()
+    assert body["project_id"] == created["id"]
+    assert body["written_files"]  # files were written
+    # The generated files now physically exist under the project's dir.
+    for rel in body["written_files"]:
+        assert (Path(created["path"]) / rel).is_file()
+
+
+@pytest.mark.asyncio
+async def test_run_with_unknown_project_is_404(client, echo_router):
+    with patch("app.agents_runtime.build_router", return_value=echo_router):
+        resp = await client.post(
+            "/agents/run",
+            json={"user_request": "do something", "project_id": "ghost"},
+        )
+    assert resp.status_code == 404
+
+
+@pytest.mark.asyncio
+async def test_run_without_project_still_works(client, echo_router):
+    # Backward compatible: no project_id → runs, writes nothing to a project dir.
+    with patch("app.agents_runtime.build_router", return_value=echo_router):
+        resp = await client.post("/agents/run", json={"user_request": "just run"})
+    assert resp.status_code == 200
+    assert resp.json()["written_files"] == []

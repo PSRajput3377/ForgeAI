@@ -11,7 +11,7 @@ the offline path is exercised by the test suite via EchoProvider.
 from __future__ import annotations
 
 from evaluation import EvaluationStore
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from observability.events import EventType
 from prompts import active_versions
 from pydantic import BaseModel
@@ -24,6 +24,7 @@ from app.github_propose import persist_agent_pr_proposal
 from app.observability_runtime import observability
 from app.performance import PerformanceStore
 from app.pr_approvals import PRApprovalStore
+from app.projects import ProjectService
 
 router = APIRouter(prefix="/agents", tags=["agents"])
 
@@ -42,22 +43,53 @@ class RunResponse(BaseModel):
     generated_files: dict[str, str]
     retries: int
     pr_approval_id: str | None = None
+    project_id: str | None = None
+    written_files: list[str] = []
 
 
 @router.post("/run", response_model=RunResponse)
 async def run(body: RunRequest, session: AsyncSession = Depends(get_session)) -> RunResponse:
     """Run the full agent workflow for a user request.
 
-    The run is scored (Phase 12.1) and the evaluation persisted to the
-    Performance Database (12.2), so the Agent Analytics dashboard reflects it.
+    If ``project_id`` is given it MUST resolve to a real project (404 otherwise);
+    the run executes against that project's workspace dir and generated files are
+    written there (Phase 13.2). The run is scored (12.1) and persisted (12.2).
     """
+    # Phase 13.2: bind the run to a real project when an id is given.
+    #
+    # ``project_id`` has long doubled as the run/correlation id for the
+    # observability timeline. We only enforce the project binding when the
+    # project store is reachable: if the id resolves to no project, 404; if the
+    # store itself is unavailable, degrade to treating project_id as a plain
+    # correlation id (legacy behavior) so observability-only paths still work.
+    project = None
+    project_path = body.project_path
+    if body.project_id is not None:
+        try:
+            project = await ProjectService(session).get(body.project_id)
+        except Exception:  # noqa: BLE001 — project store unavailable; degrade
+            project = None
+            store_reachable = False
+        else:
+            store_reachable = True
+        if store_reachable and project is None:
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "Project not found")
+        if project is not None:
+            # The project's path takes precedence over an explicit project_path.
+            project_path = project.path or project_path
+
     eval_store = EvaluationStore()
     state, github_collector = await run_request(
         body.user_request,
         project_id=body.project_id,
-        project_path=body.project_path,
+        project_path=project_path,
         evaluation_store=eval_store,
     )
+
+    # Write the generated files into the project's workspace dir on disk.
+    written_files: list[str] = []
+    if project is not None:
+        written_files = ProjectService(session).write_files(project, state.generated_code)
 
     pr_approval_id: str | None = None
     if github_collector and github_collector.collected:
@@ -114,4 +146,6 @@ async def run(body: RunRequest, session: AsyncSession = Depends(get_session)) ->
         generated_files=dict(state.generated_code),
         retries=state.retry_count,
         pr_approval_id=pr_approval_id,
+        project_id=body.project_id,
+        written_files=written_files,
     )

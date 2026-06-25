@@ -131,7 +131,7 @@ the repo, not DB rows.
 
 - [x] A `Project` owns a real workspace directory; CRUD endpoints exist and
       enforce workspace isolation.
-- [ ] `/agents/run` binds to a real `project_id`, runs against its path, writes
+- [x] `/agents/run` binds to a real `project_id`, runs against its path, writes
       files there, and 404s on an unknown id.
 - [ ] At least two starters exist (empty + FastAPI); bootstrap scaffolds
       deterministically and offline, then hands off to the pipeline.
