@@ -37,6 +37,7 @@ runs without you changing code.
 - [Why it's built this way](#why-its-built-this-way)
 - [How it works, end to end](#how-it-works-end-to-end)
 - [The self-improvement system (Phase 12)](#the-self-improvement-system-phase-12)
+- [Projects & first-run experience (Phase 13)](#projects--first-run-experience-phase-13)
 - [Applications — who uses it and for what](#applications--who-uses-it-and-for-what)
 - [Getting started](#getting-started)
 - [Using it end to end](#using-it-end-to-end)
@@ -64,7 +65,7 @@ improvements — all behind human approval gates.
 **The whole backend runs and is fully tested offline** — no Docker, no models, no
 external services required. Every external dependency (LLM, GitHub, datastores)
 has a deterministic in-memory fake, so the entire system is reproducible in CI.
-**310 tests pass** in seconds.
+**330 tests pass** in seconds.
 
 ---
 
@@ -164,6 +165,27 @@ is scored → persisted to PostgreSQL → surfaced on the analytics dashboard.
 
 See [a complete offline walkthrough](#walkthrough-see-the-whole-system-in-one-command)
 of every component below.
+
+---
+
+## Projects & first-run experience (Phase 13)
+
+Phase 12 made ForgeAI a research-grade *engine*. Phase 13 makes it a *product* —
+it gives the engine a front door. The root cause of "to which project?", "no way
+to start from nothing", and "no sub-minute wow" was one missing primitive: a
+**Project that owns a real workspace directory**. Phase 13 adds it.
+Full contract: [`specs/projects-spec.md`](specs/projects-spec.md).
+
+| Component | What it does |
+|-----------|--------------|
+| **First-class Projects** (`app/projects.py`, `/projects`) | A `Project` owns a directory on disk (`<WORKSPACES_ROOT>/<id>`). CRUD endpoints manage it within the existing Org → Workspace → Project tenancy + RBAC. The path is derived from the id (never client-supplied) and confined to the project's own folder. |
+| **Run binds to a project** | `/agents/run` resolves `project_id` → that project's path, runs the team against it, and **writes generated files there** — so a run produces a real, inspectable project on disk (404 on an unknown id). |
+| **Bootstrap from nothing** (`packages/starters`) | Create a project from a versioned **starter** — `empty`, or a `fastapi-saas` starter (JWT auth, PostgreSQL, Docker, tests). Deterministic and offline: scaffolds instantly, then hands the project to the agent team. Refuses to overwrite a non-empty project. |
+| **Onboarding flow** (`/projects` page) | Signed-in users land on a **project chooser** — *Create New* (name + starter picker) or *Open Existing* — not a bare workspace. Choosing a project binds it and opens the workspace. |
+| **The first-minute "wow"** | From a fresh account: pick a starter → it scaffolds → land in the workspace with suggested one-click first tasks → watch the team build it live. Works **offline with `MODEL_PROVIDER=echo`**, so it's demoable on any hardware. |
+
+The Project model carries a nullable `repo`, so a future **git-backed mode**
+slots in behind the same interface with no agent/workflow change.
 
 ---
 
@@ -273,15 +295,21 @@ make web-dev       # http://localhost:3000
 ### Via the UI (the intended experience)
 
 1. Open **http://localhost:3000** → **Sign in** to create an account.
-2. Open the **Workspace**.
-3. In the **New Task** box, type a request — e.g. *"Add JWT authentication"* —
-   and hit **Run** (or ⌘/Ctrl+Enter).
+2. You land on the **project chooser**: **Create New** (name it, pick a starter —
+   `empty` or the `fastapi-saas` starter) or **Open Existing**.
+3. Creating a project scaffolds it and drops you into the **Workspace**, bound to
+   that project. Use a suggested one-click task, or type your own — e.g.
+   *"Add JWT authentication"* — and hit **Run** (or ⌘/Ctrl+Enter).
 4. Watch the **agent timeline, status, and metrics update live** over the
-   WebSocket as the team plans → researches → codes → tests → reviews.
-5. Generated code and the run's verdict appear inline; any proposed PR shows up
-   in the **Approval Center** for one-click review → approve.
+   WebSocket as the team plans → researches → codes → tests → reviews. Generated
+   files are written into the project on disk.
+5. The run's verdict + generated code appear inline; any proposed PR shows up in
+   the **Approval Center** for one-click review → approve.
 6. Open **Analytics** (top-right link) to see the run land: per-agent stats,
    prompt-version comparison, and the benchmark trend.
+
+> On modest hardware, set `MODEL_PROVIDER=echo` so the whole flow runs instantly
+> and deterministically — the first-minute path needs no models.
 
 ### Via the API (everything the UI does is an endpoint — see `/docs`)
 
@@ -349,7 +377,7 @@ external services (every external dependency has a deterministic fake):
 ```bash
 cd apps/api
 uv sync
-uv run pytest -q                                # 310 tests, ~10s
+uv run pytest -q                                # 330 tests, ~10s
 uv run ruff check . && uv run black --check .   # lint + format
 ```
 
@@ -380,7 +408,8 @@ ForgeAI/
 │   ├── benchmarks/     Versioned scenario suite + harness (Phase 12)
 │   ├── selection/      Dynamic task-type routing (Phase 12)
 │   ├── learning/       A/B promotion, workflow-opt, PR-outcome (Phase 12)
-│   └── marketplace/    Register + discover third-party agents (Phase 12)
+│   ├── marketplace/    Register + discover third-party agents (Phase 12)
+│   └── starters/       Versioned project scaffolds for bootstrap (Phase 13)
 ├── specs/              What each component MUST do (checkable contracts)
 ├── docs/               How it works: architecture, ADRs, diagrams, per-domain
 ├── infrastructure/     Dockerfiles + service configs
@@ -391,7 +420,7 @@ ForgeAI/
 
 ## Status
 
-The project was built in **12 phases**, all complete:
+The project was built in **13 phases**, all complete:
 
 | Phase | Name | Status |
 |-------|------|--------|
@@ -409,6 +438,7 @@ The project was built in **12 phases**, all complete:
 | 10 | Production: Scale, Security & Reliability | ✅ |
 | 11 | Dashboard & PR Approval Center | ✅ |
 | 12 | Self-Improving Agent System | ✅ |
+| 13 | Projects & First-Run Experience | ✅ |
 
 > The data-dependent halves of the Phase 12 learning loops (auto-promotion,
 > workflow mutation, PR-outcome-driven learning) are **scaffolded behind safe
@@ -423,12 +453,12 @@ ForgeAI is documented so you can understand it **without reading the source**.
 
 - **[`docs/`](docs/README.md)** — architecture, agents, workflows, shared state,
   tools, database, API, prompts, security, testing, deployment, Mermaid
-  diagrams, and a [25-entry ADR log](docs/adr/README.md).
+  diagrams, and a [26-entry ADR log](docs/adr/README.md).
 - **[`specs/`](specs/README.md)** — the checkable contracts each component must
   satisfy, including [`self-improvement-spec.md`](specs/self-improvement-spec.md)
   (Phase 12).
 - **[`docs/00-product-design/`](docs/00-product-design/)** — the product vision
-  and the [Phase 12 plan](docs/00-product-design/phase-12-plan.md).
+  and the [Phase 12](docs/00-product-design/phase-12-plan.md) / [Phase 13](docs/00-product-design/phase-13-plan.md) plans.
 
 The "why" behind each technology choice is in [`docs/decisions.md`](docs/decisions.md).
 

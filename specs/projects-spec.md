@@ -137,7 +137,7 @@ the repo, not DB rows.
       deterministically and offline, then hands off to the pipeline.
 - [x] The UI opens on a project chooser (Create New / Open Existing) and binds
       the workspace to the chosen project.
-- [ ] A fresh user can go from sign-in to a working project in the first minute
+- [x] A fresh user can go from sign-in to a working project in the first minute
       with `MODEL_PROVIDER=echo`.
 - [ ] Fake-validated integrations are labelled in the UI/docs.
 - [ ] Offline suite green; ruff + black clean; docs + an ADR updated.

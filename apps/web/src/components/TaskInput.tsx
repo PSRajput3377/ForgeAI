@@ -10,6 +10,13 @@ import { useAppStore } from "@/store/useAppStore";
  * to POST /agents/run against the active project; the agents/timeline/metrics
  * panels update live over the WebSocket, and the final verdict is shown here.
  */
+// One-click starter tasks so a freshly-opened project isn't a blank box.
+const SUGGESTIONS = [
+  "Add a /status endpoint that returns uptime",
+  "Add a health check with a database ping",
+  "Write tests for the existing endpoints",
+];
+
 export function TaskInput() {
   const projectId = useAppStore((s) => s.activeProjectId);
   const [task, setTask] = useState("");
@@ -59,6 +66,20 @@ export function TaskInput() {
         >
           {running ? "Running…" : "Run"}
         </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-xs text-neutral-600">Try:</span>
+        {SUGGESTIONS.map((s) => (
+          <button
+            key={s}
+            onClick={() => setTask(s)}
+            disabled={running}
+            className="rounded-full border border-neutral-800 px-2.5 py-1 text-xs text-neutral-400 transition hover:border-neutral-600 hover:text-neutral-200 disabled:opacity-50"
+          >
+            {s}
+          </button>
+        ))}
       </div>
 
       <p className="text-xs text-neutral-600">

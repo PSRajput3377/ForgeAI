@@ -128,7 +128,7 @@ text(s, M, 3600000, 11000000, 1400000, [
     ("then scores every run and gets measurably better over time.", 17, INK, False),
 ], size=17)
 text(s, M, 5750000, 11000000, 500000,
-     "12 phases · 310 tests · fully offline-testable · runs on local models",
+     "13 phases · 330 tests · fully offline-testable · runs on local models",
      size=14, color=MUTE)
 
 # ===========================================================================
@@ -170,7 +170,7 @@ bullets(s, M, 1950000, 10900000, 3600000, [
     ("Multi-agent autonomous engineering", "10 specialist agents, each with one job, coordinated by an explicit workflow graph over one shared state."),
     ("Natural language → reviewed pull request", "describe a task; watch the team plan, code, test, and review it live inside a sandbox."),
     ("A self-improving layer on top", "every run is measured, stored, and compared — prompt versions, benchmarks, failure memory, learning loops."),
-    ("Runs and is fully tested offline", "every external dependency (LLM, GitHub, datastores) has a deterministic fake. 310 tests pass in seconds."),
+    ("Runs and is fully tested offline", "every external dependency (LLM, GitHub, datastores) has a deterministic fake. 330 tests pass in seconds."),
 ], size=18, gap=16)
 
 # ===========================================================================
@@ -252,6 +252,25 @@ text(s, M, 5650000, 10900000, 700000,
      size=14, color=GREEN, bold=True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
 
 # ===========================================================================
+# 6.5 — PROJECTS & FIRST-RUN (PHASE 13)
+# ===========================================================================
+s = slide()
+kicker(s, "From engine to product — Phase 13")
+title(s, "A front door: projects, bootstrap, first-minute wow")
+p13 = [
+    ("First-class Projects", "each owns a real workspace directory; CRUD within the existing tenancy + RBAC"),
+    ("Runs bind to a project", "/agents/run targets its path and writes generated files there — a real project on disk"),
+    ("Bootstrap from nothing", "versioned starters (empty, or FastAPI + JWT + Postgres + Docker + tests) scaffold instantly, offline"),
+    ("Onboarding flow", "sign in → project chooser (Create New / Open Existing) → workspace bound to the project"),
+    ("The first-minute wow", "fresh account → pick a starter → watch the team build it live; works offline (MODEL_PROVIDER=echo)"),
+]
+bullets(s, M, 1950000, 10900000, 3600000, p13, size=15.5, gap=13)
+box(s, M, 5650000, 10900000, 700000, fill=PANEL, line=ACCENT)
+text(s, M, 5650000, 10900000, 700000,
+     'Closed the critique head-on: "to which project?", "no bootstrap", "no sub-30s wow" — all resolved.',
+     size=14, color=ACCENT, bold=True, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE)
+
+# ===========================================================================
 # 7 — BENEFITS
 # ===========================================================================
 s = slide()
@@ -313,7 +332,7 @@ bullets(s, M, 1950000, 11000000, 2600000, [
 ], size=16, gap=11)
 box(s, M, 4750000, 10900000, 1150000, fill=PANEL, line=GREEN)
 text(s, M, 4850000, 10900000, 1000000, [
-    ("All 12 phases complete  ·  310 tests passing  ·  25 ADRs  ·  fully documented", 16, GREEN, True),
+    ("All 13 phases complete  ·  330 tests passing  ·  26 ADRs  ·  fully documented", 16, GREEN, True),
     ("From a static pipeline to a self-improving, approval-gated engineering team.", 14, MUTE, False),
 ], size=15, align=PP_ALIGN.CENTER, anchor=MSO_ANCHOR.MIDDLE, space=6)
 

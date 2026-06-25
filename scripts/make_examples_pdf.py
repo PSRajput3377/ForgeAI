@@ -269,11 +269,11 @@ def cover_page(canvas, doc):
     c.setFillColor(HexColor("#AFC0E6"))
     c.setFont("Helvetica", 13)
     c.drawString(ML, PAGE_H - 130 * mm,
-                 "Four complex scenarios — how one request becomes a reviewed PR,")
+                 "Five end-to-end scenarios — how one request becomes a reviewed PR,")
     c.drawString(ML, PAGE_H - 137 * mm,
                  "and how every run makes the system measurably better.")
     # stat chips
-    chips = ["12 phases complete", "310 tests passing", "runs fully offline", "local models"]
+    chips = ["13 phases complete", "330 tests passing", "runs fully offline", "local models"]
     x = ML
     c.setFont("Helvetica-Bold", 8.5)
     for ch in chips:
@@ -480,10 +480,47 @@ E.append(code_block([
     'PYTHONPATH="$PWD:$PWD/../../packages" \\',
     "  uv run python ../../scripts/demo_phase12.py",
 ]))
+E.append(PageBreak())
+
+# ============================================================= EXAMPLE 5 =====
+E.append(Banner(5, "From nothing", "First run: a working project in under a minute",
+                accent=ACCENT))
 E.append(Spacer(1, 3 * mm))
+E.append(Paragraph("<b>Who:</b> a brand-new user with an empty account.&nbsp;&nbsp;"
+                   "<b>Goal:</b> go from sign-in to a real, running project — no setup, "
+                   "no docs (Phase 13).", LEAD))
+E.append(Paragraph("The onboarding flow", H3))
+E.append(steptable([
+    ("Sign in", "Register / log in; land on the <b>project chooser</b>, not a bare workspace.",
+     "front door"),
+    ("Choose a starter", "Pick <i>Create New</i> and a starter — <b>empty</b>, or "
+     "<b>fastapi-saas</b> (JWT auth, PostgreSQL, Docker, tests).", "starter selected"),
+    ("Bootstrap", "A real project directory is provisioned and the starter is scaffolded into "
+     "it — deterministic, instant, offline (no model).", "files on disk"),
+    ("Workspace opens", "Bound to the new project, with suggested one-click first tasks so it's "
+     "not a blank box.", "ready to build"),
+    ("Run the team", "Pick a suggestion (or type one); the agents extend the project and write "
+     "files into it, live on the timeline.", "verdict + new files"),
+]))
+E.append(Spacer(1, 3 * mm))
+E.append(code_block([
+    "POST /projects/bootstrap   { workspace_id, name: 'My SaaS',",
+    "                             starter: 'fastapi-saas' }",
+    "   ->  scaffolds app/main.py, app/security.py, tests/, Dockerfile, ...",
+    "POST /agents/run           { user_request: 'Add a /status endpoint',",
+    "                             project_id: <new project> }",
+    "   ->  team runs, writes files into the project, run is scored",
+]))
+E.append(Spacer(1, 3 * mm))
+E.append(callout([
+    "The entire path — register &#8594; bootstrap &#8594; run &#8594; scored in analytics — works "
+    "<b>offline with MODEL_PROVIDER=echo</b>, so the first-minute experience is demoable on any "
+    "hardware and is covered end-to-end by the test suite.",
+], title="The first-minute wow", accent=ACCENT))
+E.append(Spacer(1, 4 * mm))
 E.append(HRule(CONTENT_W))
 E.append(Spacer(1, 2 * mm))
-E.append(Paragraph("All 12 phases complete &#183; 310 tests passing &#183; 25 ADRs &#183; "
+E.append(Paragraph("13 phases complete &#183; 330 tests passing &#183; 26 ADRs &#183; "
                    "fully documented &#183; runs on local models.", MUTED))
 
 doc.build(E)
