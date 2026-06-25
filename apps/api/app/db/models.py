@@ -121,6 +121,11 @@ class Project(Base, TimestampMixin):
     workspace_id: Mapped[str] = mapped_column(ForeignKey("workspaces.id"))
     name: Mapped[str] = mapped_column(String(255))
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    # Phase 13: a project owns a workspace directory on disk. ``repo`` is
+    # nullable so a future git-backed mode slots in behind the same model.
+    path: Mapped[str | None] = mapped_column(String(1024), nullable=True)
+    repo: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    starter: Mapped[str | None] = mapped_column(String(64), nullable=True)
 
     workspace: Mapped[Workspace] = relationship(back_populates="projects")
 

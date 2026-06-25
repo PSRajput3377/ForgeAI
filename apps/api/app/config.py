@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     api_port: int = 8000
     log_level: str = "INFO"
 
+    # Phase 13: root directory that holds each project's workspace folder.
+    workspaces_root: str = "/tmp/forge-workspaces"
+
     # Datastores
     database_url: str = "postgresql+psycopg://forge:forge@localhost:5432/forgeai"
     redis_url: str = "redis://localhost:6379/0"

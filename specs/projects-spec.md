@@ -129,7 +129,7 @@ the repo, not DB rows.
 
 ## Acceptance criteria
 
-- [ ] A `Project` owns a real workspace directory; CRUD endpoints exist and
+- [x] A `Project` owns a real workspace directory; CRUD endpoints exist and
       enforce workspace isolation.
 - [ ] `/agents/run` binds to a real `project_id`, runs against its path, writes
       files there, and 404s on an unknown id.
