@@ -1,11 +1,12 @@
 """Agent workflow endpoint.
 
 Exposes the multi-agent run over HTTP. This is a thin API-layer wrapper around
-``agents_runtime.run_request`` (which uses the Ollama-backed Model Router).
+``agents_runtime.run_request`` (which uses the configured Model Router).
 
-NOTE: a real run requires the Ollama service up with models pulled
-(``make pull-models``). Without them the request will error at the provider —
-the offline path is exercised by the test suite via EchoProvider.
+NOTE: a real run requires a working provider — ``MODEL_PROVIDER=openai`` with a
+billed ``OPENAI_API_KEY``, or Ollama up with models pulled (``make
+pull-models``). A provider failure (e.g. OpenAI quota) returns a 502 with the
+provider's message. The offline path is exercised by tests via EchoProvider.
 """
 
 from __future__ import annotations
@@ -79,12 +80,17 @@ async def run(body: RunRequest, session: AsyncSession = Depends(get_session)) ->
             project_path = project.path or project_path
 
     eval_store = EvaluationStore()
-    state, github_collector = await run_request(
-        body.user_request,
-        project_id=body.project_id,
-        project_path=project_path,
-        evaluation_store=eval_store,
-    )
+    try:
+        state, github_collector = await run_request(
+            body.user_request,
+            project_id=body.project_id,
+            project_path=project_path,
+            evaluation_store=eval_store,
+        )
+    except RuntimeError as exc:
+        # A provider-layer failure (e.g. OpenAI 429 insufficient_quota, bad key).
+        # Surface the actual message instead of an opaque 500 so the UI is useful.
+        raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(exc)) from exc
 
     # Write the generated files into the project's workspace dir on disk.
     written_files: list[str] = []
