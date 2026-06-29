@@ -5,14 +5,32 @@ models are configurable). Import the singleton `settings` everywhere.
 """
 
 from functools import lru_cache
+from pathlib import Path
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+
+def _find_env_file() -> str:
+    """Locate the repo-root ``.env`` no matter the current working directory.
+
+    The API is often launched from ``apps/api`` (see the Makefile), which has no
+    ``.env`` — a bare relative ``.env`` would silently load nothing and fall back
+    to defaults (e.g. MODEL_PROVIDER=ollama). Walk up from this file to find the
+    nearest ``.env`` so configuration is honored regardless of cwd.
+    """
+    for parent in Path(__file__).resolve().parents:
+        candidate = parent / ".env"
+        if candidate.is_file():
+            return str(candidate)
+    return ".env"  # fall back to cwd-relative if none found
 
 
 class Settings(BaseSettings):
     """Typed view over the environment. See `.env.example` for the full list."""
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=_find_env_file(), env_file_encoding="utf-8", extra="ignore"
+    )
 
     # App
     environment: str = "development"
@@ -46,14 +64,25 @@ class Settings(BaseSettings):
     git_author_name: str = "ForgeAI"
     git_author_email: str = "forgeai@users.noreply.github.com"
 
-    # Model routing (Ollama, local)
-    # Provider: "ollama" (real local models) or "echo" (deterministic, instant —
-    # for demos/CI on hardware that can't run the models). ADR-0003.
+    # Model routing.
+    # Provider: "openai" (hosted, real code generation — needs OPENAI_API_KEY),
+    # "ollama" (real local models), or "echo" (deterministic, instant — for
+    # demos/CI on hardware that can't run the models). ADR-0003.
     model_provider: str = "ollama"
     model_planner: str = "qwen3:8b"
     model_coder: str = "deepseek-coder"
     model_research: str = "llama3.1:8b"
     model_embed: str = "nomic-embed-text"
+
+    # OpenAI provider (used when model_provider == "openai").
+    openai_api_key: str = ""
+    openai_base_url: str = "https://api.openai.com/v1"
+    openai_timeout: float = 120.0
+    # Role models when on OpenAI (the Ollama names above don't apply there).
+    openai_model_planner: str = "gpt-4o"
+    openai_model_coder: str = "gpt-4o"
+    openai_model_research: str = "gpt-4o-mini"
+    openai_model_embed: str = "text-embedding-3-small"
 
 
 @lru_cache

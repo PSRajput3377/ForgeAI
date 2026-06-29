@@ -25,6 +25,9 @@ class CompletionRequest(BaseModel):
     messages: list[Message]
     temperature: float = 0.2
     max_tokens: int | None = None
+    # Optional OpenAI-style structured-output hint, e.g. {"type": "json_object"}.
+    # Providers that don't support it ignore the field.
+    response_format: dict | None = None
 
 
 class CompletionResponse(BaseModel):

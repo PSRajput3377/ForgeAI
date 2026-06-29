@@ -37,14 +37,21 @@ class ModelRouter:
         role: AgentRole,
         messages: list[Message],
         temperature: float = 0.2,
+        response_format: dict | None = None,
     ) -> CompletionResponse:
-        """Run a completion using the model configured for ``role``."""
+        """Run a completion using the model configured for ``role``.
+
+        ``response_format`` is an optional OpenAI-style structured-output hint
+        (e.g. ``{"type": "json_object"}``); providers that ignore it are
+        unaffected.
+        """
         from models.base import CompletionRequest
 
         request = CompletionRequest(
             model=self.model_for(role),
             messages=messages,
             temperature=temperature,
+            response_format=response_format,
         )
         return await self.provider.complete(request)
 

@@ -9,6 +9,7 @@ provider class — no agent code changes.
 from models.base import CompletionRequest, CompletionResponse, LLMProvider, Message
 from models.echo import EchoProvider
 from models.ollama import OllamaProvider
+from models.openai_provider import OpenAIProvider
 from models.router import ModelRouter
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "Message",
     "ModelRouter",
     "OllamaProvider",
+    "OpenAIProvider",
 ]

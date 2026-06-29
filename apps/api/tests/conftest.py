@@ -26,8 +26,15 @@ async def client(monkeypatch):
     """AsyncClient bound to the app with a fresh in-memory SQLite DB and a clean
     token denylist. Used by the auth + multi-tenancy tests (offline, ADR-0018)."""
     from app.auth.revocation import InMemoryDenylist
+    from app.config import settings
     from app.db.base import Base, get_session
     from app.main import app
+
+    # Keep the offline suite hermetic: the API now discovers the repo-root .env
+    # regardless of cwd, which may carry a real GITHUB_TOKEN / MODEL_PROVIDER.
+    # Tests that need those set them explicitly; the default here is offline.
+    monkeypatch.setattr(settings, "github_token", "")
+    monkeypatch.setattr(settings, "model_provider", "echo")
 
     engine = create_async_engine("sqlite+aiosqlite://", future=True)
     async with engine.begin() as conn:
